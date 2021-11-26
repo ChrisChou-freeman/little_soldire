@@ -4,7 +4,7 @@ from typing import Optional, Dict, Type
 import pygame
 from pygame import event, display, surface
 
-from . import settings
+from . import settings, game_start
 from .lib import GameManager
 
 class MainGame:
@@ -14,7 +14,9 @@ class MainGame:
         self.game_metadata = {
             'game_mode': 'game_start'
         }
-        self.game_mode: Dict[str, Type[GameManager]] = {}
+        self.game_mode: Dict[str, Type[GameManager]] = {
+            'game_start': game_start.GameStart
+        }
         self.game_manager: Optional[GameManager] = None
 
     def _create_screen(self) -> surface.Surface:

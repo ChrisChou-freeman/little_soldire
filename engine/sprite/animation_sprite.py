@@ -1,4 +1,4 @@
-from pygame import surface, Vector2, sprite, mask, rect, transform
+from pygame import surface, Vector2, sprite, rect, transform
 
 class AnimationSprite(sprite.Sprite):
     def __init__(self, image_sheet: surface.Surface, position: Vector2, fram_with: int, loop: bool=True) -> None:
@@ -15,7 +15,6 @@ class AnimationSprite(sprite.Sprite):
         self.image = self._get_curren_fram()
         self.rect = self.image.get_rect()
         self.rect.left, self.rect.top = int(position.x), int(position.y)
-        self.mask = mask.from_surface(image_sheet)
 
     def _get_curren_fram_area(self) -> rect.Rect:
         return rect.Rect(
