@@ -23,6 +23,11 @@ class GameStart(GameManager):
             Vector2(0, 250),
         ]
         self._load_content()
+        self.menu_list = [
+            'Start',
+            'Edit',
+            'Quit'
+        ]
 
     def _load_content(self) -> None:
         # load background lays
