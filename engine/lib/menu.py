@@ -11,8 +11,9 @@ class Menu:
         self.position = position
         self.size = self.font.size(self.menu_content)
         self.rect = rect.Rect(position.x, position.y, self.size[0], self.size[1])
+        self.be_select = False
 
-    def _check_mouse_hover(self, x, y) -> bool:
+    def check_mouse_hover(self, x, y) -> bool:
         return self.rect.collidepoint(x, y)
 
     def _set_menu_hover(self) -> None:
@@ -21,18 +22,21 @@ class Menu:
     def _set_menu_unhover(self) -> None:
         self.font_rend = self.font.render(self.menu_content, False, settings.RGB_WHITE)
 
-    def handle_input(self, env: event.Event) -> None:
-        if env.type == pygame.MOUSEMOTION:
-            pos = env.pos
-            if self._check_mouse_hover(pos[0], pos[1]):
-                self._set_menu_hover()
-            else:
-                self._set_menu_unhover()
-        if env.type == pygame.MOUSEBUTTONDOWN and env.button == 1:
-            pass
+    # def handle_input(self, env: event.Event) -> None:
+    #     if env.type == pygame.MOUSEMOTION:
+    #         pos = env.pos
+    #         if self.check_mouse_hover(pos[0], pos[1]):
+    #             self.be_select = True
+    #         else:
+    #             self.be_select = False
+    #     if env.type == pygame.MOUSEBUTTONDOWN and env.button == 1:
+    #         pass
 
     def update(self) -> None:
-        pass
+        if self.be_select:
+            self._set_menu_hover()
+        else:
+            self._set_menu_unhover()
 
     def draw(self, screen: surface.Surface) -> None:
         screen.blit(self.font_rend, self.position)
