@@ -17,7 +17,7 @@ class Menu:
         return self.rect.collidepoint(x, y)
 
     def _set_menu_hover(self) -> None:
-        self.font_rend = self.font.render(self.menu_content, False, settings.RGB_BLACK, settings.RGB_WHITE)
+        self.font_rend = self.font.render(self.menu_content, False, settings.RGB_BLACK, settings.RGB_YELLOW)
 
     def _set_menu_unhover(self) -> None:
         self.font_rend = self.font.render(self.menu_content, False, settings.RGB_WHITE)

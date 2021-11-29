@@ -21,7 +21,7 @@ class MainGame:
 
     def _create_screen(self) -> surface.Surface:
         screen = display.set_mode((settings.SCREEN_WIDTH, settings.SCREEN_HEIGHT))
-        display.set_caption('Flappy Bird')
+        display.set_caption('little soldire')
         return screen
 
     def _handle_input(self, key_event: event.Event) -> None:

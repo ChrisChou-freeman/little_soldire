@@ -9,7 +9,6 @@ from .sprite import CloudSprite
 from . import settings
 
 class GameStart(GameManager):
-
     def __init__(self, metadata: Dict[str, str]) -> None:
         super().__init__(metadata)
         self._lay_number = 5
