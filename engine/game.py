@@ -4,7 +4,7 @@ from typing import Optional, Dict, Type
 import pygame
 from pygame import event, display, surface
 
-from . import settings, game_start
+from . import settings, game_start, game_editor
 from .lib import GameManager
 
 class MainGame:
@@ -12,15 +12,17 @@ class MainGame:
         pygame.init()
         self.screen = self._create_screen()
         self.game_metadata = {
-            'game_mode': 'game_start'
+            'game_mode': 'GameStart'
         }
         self.game_mode: Dict[str, Type[GameManager]] = {
-            'game_start': game_start.GameStart
+            'GameStart': game_start.GameStart,
+            'EditGame': game_editor.GameEditor
         }
         self.game_manager: Optional[GameManager] = None
 
     def _create_screen(self) -> surface.Surface:
-        screen = display.set_mode((settings.SCREEN_WIDTH, settings.SCREEN_HEIGHT))
+        flag = pygame.FULLSCREEN|pygame.SCALED if settings.FULL_SCRREN else 0
+        screen = display.set_mode((settings.SCREEN_WIDTH, settings.SCREEN_HEIGHT), flag)
         display.set_caption('little soldire')
         return screen
 
