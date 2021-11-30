@@ -25,8 +25,8 @@ class GameStart(GameManager):
         self.menu_size = 45
         self.menu_gap = 40
         self.menu_list = [
-            'Start',
-            'Edit',
+            'Play',
+            'EditGame',
             'Quit'
         ]
         self.menus: List[Menu] = []
@@ -72,6 +72,8 @@ class GameStart(GameManager):
                     if self.select_menu_key > len(self.menus) -1:
                         self.select_menu_key = len(self.menus) -1
                     self._key_menu_select_handle()
+                case pygame.K_RETURN:
+                    self.metadata['game_mode'] = self.menu_list[self.select_menu_key]
 
     def update(self, dt: float) -> None:
         self.cloud_sprites.update(dt=dt)
