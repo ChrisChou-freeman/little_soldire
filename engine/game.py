@@ -26,9 +26,8 @@ class MainGame:
         return screen
 
     def _handle_input(self, key_event: event.Event) -> None:
-        if key_event.type == pygame.QUIT \
-                or (key_event.type == pygame.KEYDOWN and key_event.key == pygame.K_ESCAPE):
-                self._quit()
+        if key_event.type == pygame.QUIT:
+            self._quit()
         if self.game_manager is not None:
             self.game_manager.handle_input(key_event)
 
@@ -49,6 +48,8 @@ class MainGame:
         clock = pygame.time.Clock()
         while True:
             switch_mode = self.game_metadata['game_mode']
+            if switch_mode == 'Quit':
+                self._quit()
             if not isinstance(self.game_manager, self.game_mode[switch_mode]):
                 if self.game_manager is not None:
                    self.game_manager.clear(self.screen)
