@@ -1,3 +1,3 @@
-from . import game, game_editor
+from . import game
 
 MainGame = game.MainGame

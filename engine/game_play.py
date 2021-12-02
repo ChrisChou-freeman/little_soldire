@@ -1,13 +1,10 @@
-
-from typing import Dict
-
 from pygame import surface, event
 
 from .lib import GameManager
 
 class GamePlay(GameManager):
 
-    def __init__(self, metadata: Dict[str, str]) -> None:
+    def __init__(self, metadata: dict[str, str]) -> None:
         super().__init__(metadata)
 
     def handle_input(self, key_event: event.Event) -> None:

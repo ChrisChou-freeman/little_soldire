@@ -1,5 +1,4 @@
 import sys
-from typing import Optional, Dict, Type
 
 import pygame
 from pygame import event, display, surface
@@ -14,11 +13,11 @@ class MainGame:
         self.game_metadata = {
             'game_mode': 'GameStart'
         }
-        self.game_mode: Dict[str, Type[GameManager]] = {
+        self.game_mode: dict[str, type[GameManager]] = {
             'GameStart': game_start.GameStart,
             'EditGame': game_editor.GameEditor
         }
-        self.game_manager: Optional[GameManager] = None
+        self.game_manager: GameManager|None = None
 
     def _create_screen(self) -> surface.Surface:
         flag = pygame.FULLSCREEN|pygame.SCALED if settings.FULL_SCRREN else 0
