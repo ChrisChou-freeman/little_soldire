@@ -1,5 +1,4 @@
 import os
-from typing import Dict, List
 
 from pygame import surface, event, sprite, image, Vector2
 import pygame
@@ -9,12 +8,12 @@ from .sprite import CloudSprite
 from . import settings
 
 class GameStart(GameManager):
-    def __init__(self, metadata: Dict[str, str]) -> None:
+    def __init__(self, metadata: dict[str, str]) -> None:
         super().__init__(metadata)
         self._lay_number = 5
         self._cloud_number = 3
         self.cloud_sprites = sprite.Group()
-        self.background_lays: List[surface.Surface] = []
+        self.background_lays: list[surface.Surface] = []
         self.background_lays_pos = [
             Vector2(0, 0),
             Vector2(0, 0),
@@ -29,7 +28,7 @@ class GameStart(GameManager):
             'EditGame',
             'Quit'
         ]
-        self.menus: List[Menu] = []
+        self.menus: list[Menu] = []
         self.select_menu_key = 0
         self._load_content()
 
