@@ -30,6 +30,12 @@ class GameEditor(GameManager):
                 Vector2(last_layer_width*self.layers_number, y_line)
             )
             self.grid_line.append(line)
+        for x_line in range(0, last_layer_width*self.layers_number, settings.TILE_SIZE[0]):
+            line = com_type.Line(
+                Vector2(x_line, 0),
+                Vector2(x_line, settings.SCREEN_HEIGHT)
+            )
+            self.grid_line.append(line)
 
     def _scroll_backgroud(self) -> None:
         scroll_speed = 0
@@ -40,9 +46,16 @@ class GameEditor(GameManager):
         elif self.scroll_left or self.scroll_right:
             scroll_speed = (self.scroll_speed * -1) if self.scroll_right else self.scroll_speed
             lay_number = len(self.background_lays)
+            last_layer_scl_speed = 0
             for index, pos in enumerate(self.background_lays_pos):
                 current_lay = (index % lay_number) + 1
-                pos.x += current_lay / lay_number * scroll_speed
+                dif_lay_speed = current_lay / lay_number * scroll_speed
+                pos.x += dif_lay_speed
+                if index == len(self.background_lays_pos) - 1:
+                    last_layer_scl_speed = dif_lay_speed
+            for line in self.grid_line:
+                line.start_point.x += last_layer_scl_speed
+                line.eng_point.x += last_layer_scl_speed
 
     def handle_input(self, key_event: event.Event) -> None:
         if key_event.type == pygame.KEYDOWN:
@@ -51,6 +64,8 @@ class GameEditor(GameManager):
                     self.scroll_left = True
                 case pygame.K_d | pygame.K_RIGHT:
                     self.scroll_right = True
+                case pygame.K_g:
+                    self.show_grid = False if self.show_grid else True
                 case pygame.K_ESCAPE:
                     self.metadata['game_mode'] = 'GameStart'
         elif key_event.type == pygame.KEYUP:
@@ -64,6 +79,8 @@ class GameEditor(GameManager):
         self._scroll_backgroud()
 
     def _draw_grid(self, screen: surface.Surface) -> None:
+        if not self.show_grid:
+            return
         for line in self.grid_line:
             draw.line(screen, settings.RGB_WHITE, line.start_point, line.eng_point)
 
