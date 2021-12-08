@@ -3,7 +3,8 @@ import os
 from pygame import surface, event, sprite, image, Vector2
 import pygame
 
-from .lib import GameManager, Menu
+from .lib import GameManager
+from .ui import Menu
 from .sprite import CloudSprite
 from . import settings
 
