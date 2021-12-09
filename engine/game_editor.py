@@ -2,7 +2,7 @@ from pygame import surface, event, Vector2, draw, image
 import pygame
 
 from .lib import GameManager, com_fuc, com_type
-from .ui import Button
+from .ui import Button, MenuContainer
 from  . import settings
 
 class GameEditor(GameManager):
@@ -11,7 +11,8 @@ class GameEditor(GameManager):
         self._background_lays: list[surface.Surface] = []
         self._background_lays_pos: list[Vector2] = []
         self._grid_line: list[com_type.Line] = []
-        self.tiles_button: Button
+        self._tiles_button = Button(image.load(settings.TILES_BTN_IMG_PATH), Vector2(20, 20))
+        self._menu_container = MenuContainer(Vector2(0, 0), settings.SCREEN_WIDTH, int(settings.SCREEN_HEIGHT/3), settings.RGB_GRAY)
         self._layers_repets = 2
         self._load_content()
         self._scroll_speed = 2 * len(self._background_lays)
@@ -38,8 +39,6 @@ class GameEditor(GameManager):
                 Vector2(x_line, settings.SCREEN_HEIGHT)
             )
             self._grid_line.append(line)
-        buttn_img = image.load(settings.TILES_BTN_IMG_PATH)
-        self.tiles_button = Button(buttn_img, Vector2(20, 20))
 
     def _scroll_backgroud(self) -> None:
         scroll_speed = 0
@@ -61,8 +60,20 @@ class GameEditor(GameManager):
                 line.start_point.x += last_layer_scl_speed
                 line.eng_point.x += last_layer_scl_speed
 
+    def _tiles_button_click(self) -> None:
+        if self._menu_container.show:
+            self._menu_container.show = False
+            self._tiles_button.position.y -= self._menu_container.rec.height
+            self._tiles_button.rect.top -= self._menu_container.rec.height
+            self._tiles_button.rect_selected.top -= self._menu_container.rec.height
+        else:
+            self._menu_container.show = True
+            self._tiles_button.position.y += self._menu_container.rec.height
+            self._tiles_button.rect.top += self._menu_container.rec.height
+            self._tiles_button.rect_selected.top += self._menu_container.rec.height
+
     def handle_input(self, key_event: event.Event) -> None:
-        self.tiles_button.handle_input(key_event)
+        self._tiles_button.handle_input(key_event, self._tiles_button_click)
         if key_event.type == pygame.KEYDOWN:
             match key_event.key:
                 case pygame.K_a | pygame.K_LEFT:
@@ -94,8 +105,10 @@ class GameEditor(GameManager):
             lay = self._background_lays[index%len(self._background_lays)]
             screen.blit(lay, lay_pos)
         self._draw_grid(screen)
-        self.tiles_button.draw(screen)
+        self._tiles_button.draw(screen)
+        self._menu_container.draw(screen)
 
     def clear(self, screen: surface.Surface) -> None:
         self._background_lays = []
         screen.fill(settings.RGB_BLACK)
+
