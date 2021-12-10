@@ -6,7 +6,8 @@ from pygame import surface, Vector2, event, Rect, draw
 from .. import settings
 
 class Button:
-    def __init__(self, b_img: surface.Surface, position: Vector2) -> None:
+    def __init__(self, b_img: surface.Surface, position: Vector2, btn_name: str) -> None:
+        self.btn_name = btn_name
         self.position = position
         self.rect = Rect(position.x, position.y, b_img.get_width(), b_img.get_height())
         self.rect_selected = Rect(position.x-1, position.y-1, b_img.get_width()+2, b_img.get_height()+2)
@@ -17,15 +18,17 @@ class Button:
         pos = key_kent.pos
         return self.rect.collidepoint(pos[0], pos[1])
 
-    def handle_input(self, key_event: event.Event, click_handle: Callable[[], None]):
+    def handle_input(self, key_event: event.Event, click_handle: Callable[[], None]=None) -> bool:
         if key_event.type == pygame.MOUSEBUTTONDOWN:
             if key_event.button == pygame.BUTTON_LEFT:
                 self._selected = True if self._check_hover(key_event) else False
-        if key_event.type == pygame.MOUSEBUTTONUP:
+        elif key_event.type == pygame.MOUSEBUTTONUP:
             if key_event.button == pygame.BUTTON_LEFT:
                 self._selected = False
-                if self._check_hover(key_event):
+                if self._check_hover(key_event) and click_handle is not None:
                     click_handle()
+                return True
+        return False
 
     def update(self) -> None:
         pass
