@@ -2,7 +2,7 @@ from pygame import surface, event, Vector2, draw, image
 import pygame
 
 from .lib import GameManager, com_fuc, com_type
-from .ui import Button, MenuContainer
+from .ui import Button, ButtonContainer
 from  . import settings
 
 class GameEditor(GameManager):
@@ -11,8 +11,15 @@ class GameEditor(GameManager):
         self._background_lays: list[surface.Surface] = []
         self._background_lays_pos: list[Vector2] = []
         self._grid_line: list[com_type.Line] = []
-        self._tiles_button = Button(image.load(settings.TILES_BTN_IMG_PATH), Vector2(20, 20))
-        self._menu_container = MenuContainer(Vector2(0, 0), settings.SCREEN_WIDTH, int(settings.SCREEN_HEIGHT/3), settings.RGB_GRAY)
+        self._tiles_button = Button(image.load(settings.TILES_BTN_IMG_PATH), Vector2(20, 20), '')
+        self._menu_container = ButtonContainer(
+            Vector2(0, 0),
+            settings.SCREEN_WIDTH,
+            int(settings.SCREEN_HEIGHT/3),
+            settings.RGB_GRAY,
+            settings.TILES_IMG_PATH,
+            metadata
+        )
         self._layers_repets = 2
         self._load_content()
         self._scroll_speed = 2 * len(self._background_lays)
@@ -74,6 +81,7 @@ class GameEditor(GameManager):
 
     def handle_input(self, key_event: event.Event) -> None:
         self._tiles_button.handle_input(key_event, self._tiles_button_click)
+        self._menu_container.handle_input(key_event)
         if key_event.type == pygame.KEYDOWN:
             match key_event.key:
                 case pygame.K_a | pygame.K_LEFT:

@@ -11,7 +11,8 @@ class MainGame:
         pygame.init()
         self.screen = self._create_screen()
         self.game_metadata = {
-            'game_mode': 'GameStart'
+            'game_mode': 'GameStart',
+            'level_edit_tile': ''
         }
         self.game_mode: dict[str, type[GameManager]] = {
             'GameStart': game_start.GameStart,
