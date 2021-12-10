@@ -1,8 +1,8 @@
 from pygame import Rect, Vector2, surface, draw, event
 
 from .button import Button
-from ..lib import com_fuc
 from .. import settings
+from ..lib import com_fuc
 
 class ButtonContainer:
     def __init__(
@@ -48,12 +48,24 @@ class ButtonContainer:
         for btn in self._button_list:
             click = btn.handle_input(key_event)
             if click:
-                pass
+                self.metadata['level_edit_tile'] = btn.btn_name
+                print(self.metadata)
+
+    def _selected_btn(self, screen: surface.Surface, btn: Button) -> None:
+        rect = Rect(
+            btn.rect.left-1,
+            btn.rect.top-1,
+            btn.rect.width+2,
+            btn.rect.height+2
+        )
+        draw.rect(screen, settings.RGB_RED, rect, 2)
 
     def draw(self, screen: surface.Surface) -> None:
         if not self.show:
             return
         draw.rect(screen, self._color, self.rec)
-        for tile in self._button_list:
-            tile.draw(screen)
+        for btn in self._button_list:
+            if btn.btn_name == self.metadata['level_edit_tile']:
+                self._selected_btn(screen, btn)
+            btn.draw(screen)
 
