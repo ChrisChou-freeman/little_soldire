@@ -12,12 +12,13 @@ class GameEditor(GameManager):
         self._background_lays_pos: list[Vector2] = []
         self._grid_line: list[com_type.Line] = []
         self._tiles_button = Button(image.load(settings.TILES_BTN_IMG_PATH), Vector2(20, 20), '')
+        self._tiles_images = com_fuc.pygame_load_iamges_with_name(settings.TILES_IMG_PATH)
         self._menu_container = ButtonContainer(
             Vector2(0, 0),
             settings.SCREEN_WIDTH,
             int(settings.SCREEN_HEIGHT/3),
             settings.RGB_GRAY,
-            settings.TILES_IMG_PATH,
+            self._tiles_images,
             metadata
         )
         self._layers_repets = 2
@@ -26,6 +27,7 @@ class GameEditor(GameManager):
         self._scroll_left = False
         self._scroll_right = False
         self._show_grid = False
+        self._holde_mouse_left = False
 
     def _load_content(self) -> None:
         self._background_lays = com_fuc.pygame_load_images_list(settings.GAME_PLAY_BACK_IMG_PATH)
@@ -79,6 +81,25 @@ class GameEditor(GameManager):
             self._tiles_button.rect.top += self._menu_container.rec.height
             self._tiles_button.rect_selected.top += self._menu_container.rec.height
 
+    def _has_grid_area(self, key_event: event.Event) -> bool:
+        pos = key_event.pos
+        if self._menu_container.show and self._menu_container.rec.collidepoint(pos):
+            return False
+        if self._tiles_button.rect.collidepoint(pos):
+            return False
+        return True
+
+    def _draw_tiles(self, key_event: event.Event) -> None:
+        if key_event.type == pygame.MOUSEBUTTONDOWN:
+            if key_event.button == pygame.BUTTON_LEFT:
+                self._holde_mouse_left = True
+        elif key_event.type == pygame.MOUSEBUTTONUP:
+            if key_event.button == pygame.BUTTON_LEFT:
+                self._holde_mouse_left = False
+
+        if self._holde_mouse_left and self._has_grid_area(key_event):
+            print('draw tile...')
+
     def handle_input(self, key_event: event.Event) -> None:
         self._tiles_button.handle_input(key_event, self._tiles_button_click)
         self._menu_container.handle_input(key_event)
@@ -98,6 +119,7 @@ class GameEditor(GameManager):
                     self._scroll_left = False
                 case pygame.K_d | pygame.K_RIGHT:
                     self._scroll_right = False
+        self._draw_tiles(key_event)
 
     def update(self, _) -> None:
         self._scroll_backgroud()

@@ -14,3 +14,9 @@ def pygame_load_images_list(path: str) -> list[surface.Surface]:
 def pygame_load_iamges_with_name(path: str) -> dict[str, surface.Surface]:
     file_list = listdir_clean(path)
     return { file: image.load(os.path.join(path, file)) for file in file_list  }
+
+def load_world_data():
+    pass
+
+def write_world_data():
+    pass
