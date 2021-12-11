@@ -96,7 +96,6 @@ class GameEditor(GameManager):
         elif key_event.type == pygame.MOUSEBUTTONUP:
             if key_event.button == pygame.BUTTON_LEFT:
                 self._holde_mouse_left = False
-
         if self._holde_mouse_left and self._has_grid_area(key_event):
             print('draw tile...')
 
