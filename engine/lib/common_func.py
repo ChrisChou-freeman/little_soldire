@@ -18,9 +18,15 @@ def pygame_load_iamges_with_name(path: str) -> dict[str, surface.Surface]:
     file_list = listdir_clean(path)
     return { file: image.load(os.path.join(path, file)) for file in file_list  }
 
+
+# load and save game world data
 def load_world_data(world_data_path: str) -> WorldDataStruct:
+    world_data_obj: WorldDataStruct
+    if not os.path.exists(world_data_path):
+        world_data_obj = WorldDataStruct([], {}, {})
+        return world_data_obj
     with open(world_data_path, 'rb') as file_obj:
-        world_data_obj: WorldDataStruct = pickle.load(file_obj)
+        world_data_obj = pickle.load(file_obj)
         return world_data_obj
 
 def write_world_data(

@@ -1,3 +1,5 @@
+import os
+
 from pygame import surface, event, Vector2, draw, image
 import pygame
 
@@ -13,6 +15,8 @@ class GameEditor(GameManager):
         self._grid_line: list[com_type.Line] = []
         self._tiles_button = Button(image.load(settings.TILES_BTN_IMG_PATH), Vector2(20, 20), '')
         self._tiles_images = com_fuc.pygame_load_iamges_with_name(settings.TILES_IMG_PATH)
+        self._item = com_fuc.pygame_load_iamges_with_name(settings.ITEMS_IMG_PATH)
+        self._sprite = com_fuc.pygame_load_iamges_with_name(settings.SPRITE_IMG_PATH)
         self._menu_container = ButtonContainer(
             Vector2(0, 0),
             settings.SCREEN_WIDTH,
@@ -22,12 +26,15 @@ class GameEditor(GameManager):
             metadata
         )
         self._layers_repets = 2
-        self._load_content()
+        self._current_level = 0
         self._scroll_speed = 2 * len(self._background_lays)
         self._scroll_left = False
         self._scroll_right = False
         self._show_grid = False
         self._holde_mouse_left = False
+        self._world_data_path = os.path.join(settings.WORLD_DATA_PATH, f'{self._current_level}.pk')
+        self._world_data = com_fuc.load_world_data(self._world_data_path)
+        self._load_content()
 
     def _load_content(self) -> None:
         self._background_lays = com_fuc.pygame_load_images_list(settings.GAME_PLAY_BACK_IMG_PATH)
@@ -97,7 +104,9 @@ class GameEditor(GameManager):
             if key_event.button == pygame.BUTTON_LEFT:
                 self._holde_mouse_left = False
         if self._holde_mouse_left and self._has_grid_area(key_event):
-            print('draw tile...')
+            # draw tiles
+            tile_x, tile_y = key_event.pos[0]//32, key_event.pos[1]//32
+            tile_data = {'x': tile_x, 'y': tile_y, 'tile': int(self.metadata['level_edit_tile'].split('.')[0])}
 
     def handle_input(self, key_event: event.Event) -> None:
         self._tiles_button.handle_input(key_event, self._tiles_button_click)
