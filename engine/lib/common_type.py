@@ -10,5 +10,7 @@ class Line(NamedTuple):
 @dataclass
 class WorldDataStruct:
     tile_data: list[dict[str, int]]
+    item_data: list[dict[str, int]]
+    sprite_data: list[dict[str, int]]
     collition_data: dict[str, list[int]]
     level_info: dict[str, int]

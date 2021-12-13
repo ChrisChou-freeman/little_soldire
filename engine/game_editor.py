@@ -15,14 +15,14 @@ class GameEditor(GameManager):
         self._grid_line: list[com_type.Line] = []
         self._tiles_button = Button(image.load(settings.TILES_BTN_IMG_PATH), Vector2(20, 20), '')
         self._tiles_images = com_fuc.pygame_load_iamges_with_name(settings.TILES_IMG_PATH)
-        self._item = com_fuc.pygame_load_iamges_with_name(settings.ITEMS_IMG_PATH)
-        self._sprite = com_fuc.pygame_load_iamges_with_name(settings.SPRITE_IMG_PATH)
+        self._item_images = com_fuc.pygame_load_iamges_with_name(settings.ITEMS_IMG_PATH)
+        self._sprite_images = com_fuc.pygame_load_iamges_with_name(settings.SPRITE_IMG_PATH)
         self._menu_container = ButtonContainer(
             Vector2(0, 0),
             settings.SCREEN_WIDTH,
             int(settings.SCREEN_HEIGHT/3),
             settings.RGB_GRAY,
-            self._tiles_images,
+            [self._tiles_images, self._item_images, self._sprite_images],
             metadata
         )
         self._layers_repets = 2
@@ -106,7 +106,15 @@ class GameEditor(GameManager):
         if self._holde_mouse_left and self._has_grid_area(key_event):
             # draw tiles
             tile_x, tile_y = key_event.pos[0]//32, key_event.pos[1]//32
-            tile_data = {'x': tile_x, 'y': tile_y, 'tile': int(self.metadata['level_edit_tile'].split('.')[0])}
+            tile_type, tile_name = self.metadata['level_edit_tile'].split('_')
+            png_data = {'x': tile_x, 'y': tile_y, 'img': int(tile_name.split('.')[0])}
+            match tile_type:
+                case 'tile':
+                    self._world_data.tile_data.append(png_data)
+                case 'item':
+                    self._world_data.item_data.append(png_data)
+                case 'sprite':
+                    self._world_data.sprite_data.append(png_data)
 
     def handle_input(self, key_event: event.Event) -> None:
         self._tiles_button.handle_input(key_event, self._tiles_button_click)
@@ -138,6 +146,24 @@ class GameEditor(GameManager):
         for line in self._grid_line:
             draw.line(screen, settings.RGB_WHITE, line.start_point, line.eng_point)
 
+    def _rander_world_data(self,
+            screen: surface.Surface,
+            datas_info: list[dict[str, int]],
+            img_type: str) -> None:
+        for data_info in datas_info:
+            x, y, img = data_info['x'], data_info['y'], data_info['img']
+            tile_name = f'{img_type}_{img}.png'
+            img_surface: surface.Surface|None = None
+            match img_type:
+                case 'tile':
+                    img_surface = self._tiles_images[tile_name]
+                case 'sprite':
+                    img_surface = self._sprite_images[tile_name]
+                case 'items':
+                    img_surface = self._item_images[tile_name]
+            if img_surface is not None:
+                screen.blit(img_surface, Vector2(x*32, y*32))
+
     def draw(self, screen: surface.Surface) -> None:
         for index,lay_pos in enumerate(self._background_lays_pos):
             lay = self._background_lays[index%len(self._background_lays)]
@@ -145,6 +171,9 @@ class GameEditor(GameManager):
         self._draw_grid(screen)
         self._tiles_button.draw(screen)
         self._menu_container.draw(screen)
+        self._rander_world_data(screen, self._world_data.tile_data, 'tile')
+        self._rander_world_data(screen, self._world_data.item_data, 'item')
+        self._rander_world_data(screen, self._world_data.sprite_data, 'sprite')
 
     def clear(self, screen: surface.Surface) -> None:
         self._background_lays = []
