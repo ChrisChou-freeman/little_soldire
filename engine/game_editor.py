@@ -108,13 +108,7 @@ class GameEditor(GameManager):
             tile_x, tile_y = key_event.pos[0]//32, key_event.pos[1]//32
             tile_type, tile_name = self.metadata['level_edit_tile'].split('_')
             png_data = {'x': tile_x, 'y': tile_y, 'img': int(tile_name.split('.')[0])}
-            match tile_type:
-                case 'tile':
-                    self._world_data.tile_data.append(png_data)
-                case 'item':
-                    self._world_data.item_data.append(png_data)
-                case 'sprite':
-                    self._world_data.sprite_data.append(png_data)
+            self._world_data.add_img_by_type(png_data, tile_type)
 
     def handle_input(self, key_event: event.Event) -> None:
         self._tiles_button.handle_input(key_event, self._tiles_button_click)

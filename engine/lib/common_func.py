@@ -19,12 +19,6 @@ def pygame_load_iamges_with_name(path: str) -> dict[str, surface.Surface]:
     file_list = listdir_clean(path)
     return {f'{folder_name}_{file}': image.load(os.path.join(path, file)) for file in file_list}
 
-def search_word_data_img(datas_info: list[dict[str, int]], x: int, y: int) -> int:
-    for index, data in enumerate(datas_info):
-        if data['x'] == x and data['y'] == y:
-            return index
-    return -2
-
 # load and save game world data
 def load_world_data(world_data_path: str) -> WorldDataStruct:
     world_data_obj: WorldDataStruct
