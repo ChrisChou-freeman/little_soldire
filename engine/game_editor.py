@@ -10,7 +10,7 @@ from  . import settings
 class GameEditor(GameManager):
     def __init__(self, metadata: dict[str, str]) -> None:
         super().__init__(metadata)
-        self._background_lays: list[surface.Surface] = []
+        self._background_lays = com_fuc.pygame_load_images_list(settings.GAME_PLAY_BACK_IMG_PATH)
         self._background_lays_pos: list[Vector2] = []
         self._grid_line: list[com_type.Line] = []
         self._tiles_button = Button(image.load(settings.TILES_BTN_IMG_PATH), Vector2(20, 20), '')
@@ -34,10 +34,9 @@ class GameEditor(GameManager):
         self._holde_mouse_left = False
         self._world_data_path = os.path.join(settings.WORLD_DATA_PATH, f'{self._current_level}.pk')
         self._world_data = com_fuc.load_world_data(self._world_data_path)
-        self._load_content()
+        self._init_content()
 
-    def _load_content(self) -> None:
-        self._background_lays = com_fuc.pygame_load_images_list(settings.GAME_PLAY_BACK_IMG_PATH)
+    def _init_content(self) -> None:
         last_backgrad_width = self._background_lays[-1].get_width()
         self._background_lays_pos = [Vector2(r * last_backgrad_width, i*80) \
                 for r in range(self._layers_repets)\
@@ -68,13 +67,14 @@ class GameEditor(GameManager):
             last_layer_scl_speed = 0
             for index, pos in enumerate(self._background_lays_pos):
                 current_lay = (index % lay_number) + 1
-                dif_lay_speed = current_lay / lay_number * scroll_speed
+                dif_lay_speed = int(current_lay / lay_number * scroll_speed)
                 pos.x += dif_lay_speed
                 if index == len(self._background_lays_pos) - 1:
                     last_layer_scl_speed = dif_lay_speed
             for line in self._grid_line:
                 line.start_point.x += last_layer_scl_speed
                 line.eng_point.x += last_layer_scl_speed
+            self._world_data.scroll_word(last_layer_scl_speed)
 
     def _tiles_button_click(self) -> None:
         if self._menu_container.show:
@@ -103,12 +103,20 @@ class GameEditor(GameManager):
         elif key_event.type == pygame.MOUSEBUTTONUP:
             if key_event.button == pygame.BUTTON_LEFT:
                 self._holde_mouse_left = False
-        if self._holde_mouse_left and self._has_grid_area(key_event):
-            # draw tiles
-            tile_x, tile_y = key_event.pos[0]//32, key_event.pos[1]//32
-            tile_type, tile_name = self.metadata['level_edit_tile'].split('_')
-            png_data = {'x': tile_x, 'y': tile_y, 'img': int(tile_name.split('.')[0])}
-            self._world_data.add_img_by_type(png_data, tile_type)
+        elif key_event.type == pygame.MOUSEMOTION:
+            if self._holde_mouse_left \
+                    and self._has_grid_area(key_event) \
+                    and self.metadata['level_edit_tile'] != '':
+                # draw tiles
+                tile_x, tile_y = key_event.pos[0]//32, key_event.pos[1]//32
+                tile_type, tile_name = self.metadata['level_edit_tile'].split('_')
+                png_data = {
+                    'x': tile_x,
+                    'y': tile_y,
+                    'scroll': 0,
+                    'img': int(tile_name.split('.')[0])
+                }
+                self._world_data.add_img_by_type(png_data, tile_type)
 
     def handle_input(self, key_event: event.Event) -> None:
         self._tiles_button.handle_input(key_event, self._tiles_button_click)
@@ -156,18 +164,18 @@ class GameEditor(GameManager):
                 case 'items':
                     img_surface = self._item_images[tile_name]
             if img_surface is not None:
-                screen.blit(img_surface, Vector2(x*32, y*32))
+                screen.blit(img_surface, Vector2(x*32 + data_info['scroll'], y*32))
 
     def draw(self, screen: surface.Surface) -> None:
         for index,lay_pos in enumerate(self._background_lays_pos):
             lay = self._background_lays[index%len(self._background_lays)]
             screen.blit(lay, lay_pos)
         self._draw_grid(screen)
-        self._tiles_button.draw(screen)
-        self._menu_container.draw(screen)
         self._rander_world_data(screen, self._world_data.tile_data, 'tile')
         self._rander_world_data(screen, self._world_data.item_data, 'item')
         self._rander_world_data(screen, self._world_data.sprite_data, 'sprite')
+        self._tiles_button.draw(screen)
+        self._menu_container.draw(screen)
 
     def clear(self, screen: surface.Surface) -> None:
         self._background_lays = []
