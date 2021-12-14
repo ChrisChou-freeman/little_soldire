@@ -16,15 +16,24 @@ class WorldDataStruct:
     level_info: dict[str, int]
 
     def delete_img_by_pos(self, x: int, y: int) -> None:
-        pass
+        all_imgs_info = self._get_all_imgs_info()
+        flag = False
+        imgs = 0
+        img = 0
+        for imgs_index, imgs_info in enumerate(all_imgs_info):
+            for img_index, png_info in enumerate(imgs_info):
+                if png_info['x'] == x and png_info['y'] == y:
+                    flag = True
+                    imgs = imgs_index
+                    img = img_index
+        if flag:
+            del all_imgs_info[imgs][img]
 
-    def update_img_by_pos(self, x: int, y: int) -> None:
-        pass
-
-    def _get_all_pngs_info(self) -> list[list[dict[str, int]]]:
-        return [self.tile_data, self. item_data, self.sprite_data]
+    def _get_all_imgs_info(self) -> list[list[dict[str, int]]]:
+        return [self.tile_data, self.item_data, self.sprite_data]
 
     def add_img_by_type(self, img_info: dict[str, int], img_type: str) -> None:
+        self.delete_img_by_pos(img_info['x'], img_info['y'])
         match img_type:
             case 'tile':
                 self.tile_data.append(img_info)
@@ -32,9 +41,4 @@ class WorldDataStruct:
                 self.item_data.append(img_info)
             case 'sprite':
                 self.sprite_data.append(img_info)
-
-    def scroll_word(self, scroll_speed: int) -> None:
-        for pngs_info in self._get_all_pngs_info():
-            for png_info in pngs_info:
-                png_info['scroll'] += scroll_speed
 

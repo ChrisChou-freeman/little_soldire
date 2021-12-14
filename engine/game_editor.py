@@ -1,11 +1,11 @@
 import os
 
-from pygame import surface, event, Vector2, draw, image
 import pygame
+from pygame import surface, event, Vector2, draw, image
 
-from .lib import GameManager, com_fuc, com_type
-from .ui import Button, ButtonContainer
 from  . import settings
+from .ui import Button, ButtonContainer
+from .lib import GameManager, com_fuc, com_type
 
 class GameEditor(GameManager):
     def __init__(self, metadata: dict[str, str]) -> None:
@@ -32,6 +32,8 @@ class GameEditor(GameManager):
         self._scroll_right = False
         self._show_grid = False
         self._holde_mouse_left = False
+        self._holde_mouse_right = False
+        self._surface_scroll_value = 0
         self._world_data_path = os.path.join(settings.WORLD_DATA_PATH, f'{self._current_level}.pk')
         self._world_data = com_fuc.load_world_data(self._world_data_path)
         self._init_content()
@@ -71,10 +73,7 @@ class GameEditor(GameManager):
                 pos.x += dif_lay_speed
                 if index == len(self._background_lays_pos) - 1:
                     last_layer_scl_speed = dif_lay_speed
-            for line in self._grid_line:
-                line.start_point.x += last_layer_scl_speed
-                line.eng_point.x += last_layer_scl_speed
-            self._world_data.scroll_word(last_layer_scl_speed)
+            self._surface_scroll_value += last_layer_scl_speed
 
     def _tiles_button_click(self) -> None:
         if self._menu_container.show:
@@ -100,23 +99,30 @@ class GameEditor(GameManager):
         if key_event.type == pygame.MOUSEBUTTONDOWN:
             if key_event.button == pygame.BUTTON_LEFT:
                 self._holde_mouse_left = True
+            elif key_event.button == pygame.BUTTON_RIGHT:
+                self._holde_mouse_right = True
         elif key_event.type == pygame.MOUSEBUTTONUP:
             if key_event.button == pygame.BUTTON_LEFT:
                 self._holde_mouse_left = False
+            elif key_event.button == pygame.BUTTON_RIGHT:
+                self._holde_mouse_right = False
         elif key_event.type == pygame.MOUSEMOTION:
+            mouse_x = key_event.pos[0] - self._surface_scroll_value
+            tile_x, tile_y = mouse_x//32, key_event.pos[1]//32
             if self._holde_mouse_left \
                     and self._has_grid_area(key_event) \
                     and self.metadata['level_edit_tile'] != '':
                 # draw tiles
-                tile_x, tile_y = key_event.pos[0]//32, key_event.pos[1]//32
                 tile_type, tile_name = self.metadata['level_edit_tile'].split('_')
                 png_data = {
                     'x': tile_x,
                     'y': tile_y,
-                    'scroll': 0,
                     'img': int(tile_name.split('.')[0])
                 }
                 self._world_data.add_img_by_type(png_data, tile_type)
+            elif self._holde_mouse_right \
+                    and self._has_grid_area(key_event):
+                self._world_data.delete_img_by_pos(tile_x, tile_y)
 
     def handle_input(self, key_event: event.Event) -> None:
         self._tiles_button.handle_input(key_event, self._tiles_button_click)
@@ -146,7 +152,15 @@ class GameEditor(GameManager):
         if not self._show_grid:
             return
         for line in self._grid_line:
-            draw.line(screen, settings.RGB_WHITE, line.start_point, line.eng_point)
+            start_point = Vector2(
+                line.start_point.x + self._surface_scroll_value,
+                line.start_point.y
+            )
+            eng_point = Vector2(
+                line.eng_point.x + self._surface_scroll_value,
+                line.eng_point.y
+            )
+            draw.line(screen, settings.RGB_WHITE, start_point, eng_point)
 
     def _rander_world_data(self,
             screen: surface.Surface,
@@ -164,7 +178,7 @@ class GameEditor(GameManager):
                 case 'items':
                     img_surface = self._item_images[tile_name]
             if img_surface is not None:
-                screen.blit(img_surface, Vector2(x*32 + data_info['scroll'], y*32))
+                screen.blit(img_surface, Vector2(x*32 + self._surface_scroll_value, y*32))
 
     def draw(self, screen: surface.Surface) -> None:
         for index,lay_pos in enumerate(self._background_lays_pos):
