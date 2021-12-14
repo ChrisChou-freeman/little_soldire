@@ -15,13 +15,14 @@ class WorldDataStruct:
     collition_data: dict[str, list[int]]
     level_info: dict[str, int]
 
-    @staticmethod
-    def delete_img_by_pos(x: int, y: int) -> None:
+    def delete_img_by_pos(self, x: int, y: int) -> None:
         pass
 
-    @staticmethod
-    def update_img_by_pos(x: int, y: int) -> None:
+    def update_img_by_pos(self, x: int, y: int) -> None:
         pass
+
+    def _get_all_pngs_info(self) -> list[list[dict[str, int]]]:
+        return [self.tile_data, self. item_data, self.sprite_data]
 
     def add_img_by_type(self, img_info: dict[str, int], img_type: str) -> None:
         match img_type:
@@ -31,3 +32,9 @@ class WorldDataStruct:
                 self.item_data.append(img_info)
             case 'sprite':
                 self.sprite_data.append(img_info)
+
+    def scroll_word(self, scroll_speed: int) -> None:
+        for pngs_info in self._get_all_pngs_info():
+            for png_info in pngs_info:
+                png_info['scroll'] += scroll_speed
+
