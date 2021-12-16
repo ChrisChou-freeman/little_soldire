@@ -1,3 +1,4 @@
+import pygame
 from pygame import Rect, Vector2, surface, draw, event
 
 from .button import Button
@@ -47,10 +48,15 @@ class ButtonContainer:
     def handle_input(self, key_event: event.Event) -> None:
         if not self.show:
             return
+        if key_event.type == pygame.KEYDOWN and key_event.key == pygame.K_TAB:
+            self._btn_tab += 1
+            if self._btn_tab >= len(self._button_list):
+                self._btn_tab = 0
         for btn in self._button_list[self._btn_tab]:
             click = btn.handle_input(key_event)
             if click:
                 self.metadata['level_edit_tile'] = btn.btn_name
+                print(self.metadata)
 
     def _selected_btn(self, screen: surface.Surface, btn: Button) -> None:
         rect = Rect(
