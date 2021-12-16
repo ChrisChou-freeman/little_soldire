@@ -4,8 +4,18 @@ import pygame
 from pygame import surface, event, Vector2, draw, image
 
 from  . import settings
-from .ui import Button, ButtonContainer
+from .ui import Button, ButtonContainer, Tip
 from .lib import GameManager, com_fuc, com_type
+
+TIP_MSG = {
+    'regular': [
+        's to save',
+        'g to show or hide Grid Line',
+    ],
+    'show_container': [
+        '<tab> to switch tiles'
+    ]
+}
 
 class GameEditor(GameManager):
     def __init__(self, metadata: dict[str, str]) -> None:
@@ -36,12 +46,14 @@ class GameEditor(GameManager):
         self._surface_scroll_value = 0
         self._world_data_path = os.path.join(settings.WORLD_DATA_PATH, f'{self._current_level}.pk')
         self._world_data = com_fuc.load_world_data(self._world_data_path)
+        self._tip: dict[str, list[Tip]] = {}
         self._init_content()
 
     def _init_content(self) -> None:
+        # init background
         last_backgrad_width = self._background_lays[-1].get_width()
         self._background_lays_pos = [Vector2(r * last_backgrad_width, i*80) \
-                for r in range(self._layers_repets)\
+                for r in range(self._layers_repets) \
                 for i in range(len(self._background_lays))]
         last_layer_width = self._background_lays[-1].get_width()
         for y_line in range(0, settings.SCREEN_HEIGHT, settings.TILE_SIZE[1]):
@@ -50,12 +62,22 @@ class GameEditor(GameManager):
                 Vector2(last_layer_width*self._layers_repets, y_line)
             )
             self._grid_line.append(line)
+        # init grid
         for x_line in range(0, last_layer_width*self._layers_repets, settings.TILE_SIZE[0]):
             line = com_type.Line(
                 Vector2(x_line, 0),
                 Vector2(x_line, settings.SCREEN_HEIGHT)
             )
             self._grid_line.append(line)
+        # init tip
+        tip_start = [settings.SCREEN_WIDTH - 10, settings.SCREEN_HEIGHT-settings.SCREEN_HEIGHT/10]
+        tip_gap = 30
+        for tip_type, msgs in TIP_MSG.items():
+            if self._tip.get(tip_type) is None:
+                self._tip[tip_type] = []
+            for index, msg in enumerate(msgs):
+                tip_obj = Tip(msg, Vector2(tip_start[0], tip_start[1] - tip_gap*index), 25)
+                self._tip[tip_type].append(tip_obj)
 
     def _scroll_backgroud(self) -> None:
         scroll_speed = 0
@@ -109,6 +131,8 @@ class GameEditor(GameManager):
         elif key_event.type == pygame.MOUSEMOTION:
             mouse_x = key_event.pos[0] - self._surface_scroll_value
             tile_x, tile_y = mouse_x//32, key_event.pos[1]//32
+            if tile_y > settings.SCREEN_HEIGHT//32-1:
+                return
             if self._holde_mouse_left \
                     and self._has_grid_area(key_event) \
                     and self.metadata['level_edit_tile'] != '':
@@ -137,6 +161,8 @@ class GameEditor(GameManager):
                     self._show_grid = False if self._show_grid else True
                 case pygame.K_ESCAPE:
                     self.metadata['game_mode'] = 'GameStart'
+                case pygame.K_s:
+                    com_fuc.write_world_data(self._world_data_path, self._world_data)
         elif key_event.type == pygame.KEYUP:
             match key_event.key:
                 case pygame.K_a | pygame.K_LEFT:
@@ -180,6 +206,15 @@ class GameEditor(GameManager):
             if img_surface is not None:
                 screen.blit(img_surface, Vector2(x*32 + self._surface_scroll_value, y*32))
 
+    def _draw_tips(self, screen: surface.Surface) -> None:
+        tips_list: list[Tip] = []
+        if self._menu_container.show:
+            tips_list = self._tip['show_container']
+        else:
+            tips_list = self._tip['regular']
+        for tip in tips_list:
+            tip.draw(screen)
+
     def draw(self, screen: surface.Surface) -> None:
         for index,lay_pos in enumerate(self._background_lays_pos):
             lay = self._background_lays[index%len(self._background_lays)]
@@ -190,6 +225,7 @@ class GameEditor(GameManager):
         self._rander_world_data(screen, self._world_data.sprite_data, 'sprite')
         self._tiles_button.draw(screen)
         self._menu_container.draw(screen)
+        self._draw_tips(screen)
 
     def clear(self, screen: surface.Surface) -> None:
         self._background_lays = []

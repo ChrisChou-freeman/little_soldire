@@ -14,7 +14,12 @@ class Button:
         self.btn_name = btn_name
         self.position = position
         self.rect = Rect(position.x, position.y, b_img.get_width(), b_img.get_height())
-        self.rect_selected = Rect(position.x-1, position.y-1, b_img.get_width()+2, b_img.get_height()+2)
+        self.rect_selected = Rect(
+            position.x-1,
+            position.y-1,
+            b_img.get_width()+2,
+            b_img.get_height()+2
+        )
         self._b_img = b_img
         self._selected = False
 

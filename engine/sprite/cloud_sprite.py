@@ -4,7 +4,10 @@ from .. import settings
 
 class CloudSprite(sprite.Sprite):
 
-    def __init__(self, image: surface.Surface, position: Vector2, speed_time: int) -> None:
+    def __init__(self,
+                 image: surface.Surface,
+                 position: Vector2,
+                 speed_time: int) -> None:
         super().__init__()
         self.image = image
         self.rect = image.get_rect()

@@ -11,7 +11,12 @@ class Menu:
         self.be_select = False
 
     def _set_menu_hover(self) -> None:
-        self.font_rend = self.font.render(self.menu_content, False, settings.RGB_BLACK, settings.RGB_YELLOW)
+        self.font_rend = self.font.render(
+            self.menu_content,
+            False,
+            settings.RGB_BLACK,
+            settings.RGB_YELLOW
+        )
 
     def _set_menu_unhover(self) -> None:
         self.font_rend = self.font.render(self.menu_content, False, settings.RGB_WHITE)

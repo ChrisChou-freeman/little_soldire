@@ -1,7 +1,10 @@
 from pygame import surface, Vector2, sprite, rect, transform
 
 class AnimationSprite(sprite.Sprite):
-    def __init__(self, image_sheet: surface.Surface, position: Vector2, fram_with: int, loop: bool=True) -> None:
+    def __init__(self,
+                 image_sheet: surface.Surface,
+                 position: Vector2,
+                 fram_with: int, loop: bool=True) -> None:
         super().__init__()
         self._current_fram = 0
         self._loop = loop
