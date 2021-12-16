@@ -5,16 +5,15 @@ from .button import Button
 from .. import settings
 
 class ButtonContainer:
-    def __init__(
-            self,
-            position: Vector2,
-            width: int,
-            height: int,
-            color: tuple[int, int, int],
-            button_imags: list[dict[str, surface.Surface]],
-            metadata: dict[str, str]) -> None:
+    def __init__(self,
+                 position: Vector2,
+                 width: int,
+                 height: int,
+                 color: tuple[int, int, int],
+                 button_imags: list[dict[str, surface.Surface]],
+                 metadata: dict[str, str]) -> None:
         self._button_images = button_imags
-        self.metadata = metadata
+        self._metadata = metadata
         self.show = False
         self.rec = Rect(position.x, position.y, width, height)
         self._color = color
@@ -55,8 +54,7 @@ class ButtonContainer:
         for btn in self._button_list[self._btn_tab]:
             click = btn.handle_input(key_event)
             if click:
-                self.metadata['level_edit_tile'] = btn.btn_name
-                print(self.metadata)
+                self._metadata['level_edit_tile'] = btn.btn_name
 
     def _selected_btn(self, screen: surface.Surface, btn: Button) -> None:
         rect = Rect(
@@ -72,7 +70,7 @@ class ButtonContainer:
             return
         draw.rect(screen, self._color, self.rec)
         for btn in self._button_list[self._btn_tab]:
-            if btn.btn_name == self.metadata['level_edit_tile']:
+            if btn.btn_name == self._metadata['level_edit_tile']:
                 self._selected_btn(screen, btn)
             btn.draw(screen)
 
