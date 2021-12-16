@@ -29,9 +29,7 @@ def load_world_data(world_data_path: str) -> WorldDataStruct:
         world_data_obj = pickle.load(file_obj)
         return world_data_obj
 
-def write_world_data(
-        world_data_path: str,
-        world_data_obj: WorldDataStruct) -> None:
+def write_world_data(world_data_path: str, world_data_obj: WorldDataStruct) -> None:
     with open(world_data_path, 'wb') as  file_obj:
         pickle.dump(world_data_obj, file_obj)
 
