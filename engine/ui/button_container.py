@@ -23,7 +23,7 @@ class ButtonContainer:
         self._load_buttons()
 
     def _load_buttons(self) -> None:
-        cols = self.rec.width//(settings.TILE_SIZE[0] + self.btn_border)
+        cols = self.rec.width // (settings.TILE_SIZE[0] + self.btn_border)
         for btn_imgs in self._button_images:
             rows = len(btn_imgs) // cols
             if len(btn_imgs) % cols > 0:

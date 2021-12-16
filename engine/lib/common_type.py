@@ -26,8 +26,9 @@ class WorldDataStruct:
                     flag = True
                     imgs = imgs_index
                     img = img_index
-        if flag:
-            del all_imgs_info[imgs][img]
+                if flag:
+                    del all_imgs_info[imgs][img]
+                    return
 
     def _get_all_imgs_info(self) -> list[list[dict[str, int]]]:
         return [self.tile_data, self.item_data, self.sprite_data]
