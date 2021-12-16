@@ -197,11 +197,11 @@ class GameEditor(GameManager):
             tile_name = f'{img_type}_{img}.png'
             img_surface: surface.Surface|None = None
             match img_type:
-                case 'tile':
+                case settings.IMG_TYPE_TILES:
                     img_surface = self._tiles_images[tile_name]
-                case 'sprite':
+                case settings.IMG_TYPE_SPRITES:
                     img_surface = self._sprite_images[tile_name]
-                case 'items':
+                case settings.IMG_TYPE_ITEMS:
                     img_surface = self._item_images[tile_name]
             if img_surface is not None:
                 screen.blit(img_surface, Vector2(x*32 + self._surface_scroll_value, y*32))
@@ -220,9 +220,9 @@ class GameEditor(GameManager):
             lay = self._background_lays[index%len(self._background_lays)]
             screen.blit(lay, lay_pos)
         self._draw_grid(screen)
-        self._rander_world_data(screen, self._world_data.tile_data, 'tile')
-        self._rander_world_data(screen, self._world_data.item_data, 'item')
-        self._rander_world_data(screen, self._world_data.sprite_data, 'sprite')
+        self._rander_world_data(screen, self._world_data.tiles_data, settings.IMG_TYPE_TILES)
+        self._rander_world_data(screen, self._world_data.items_data, settings.IMG_TYPE_ITEMS)
+        self._rander_world_data(screen, self._world_data.sprites_data, settings.IMG_TYPE_SPRITES)
         self._tiles_button.draw(screen)
         self._menu_container.draw(screen)
         self._draw_tips(screen)
