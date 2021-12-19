@@ -152,23 +152,21 @@ class GameEditor(GameManager):
         self._tiles_button.handle_input(key_event, self._tiles_button_click)
         self._menu_container.handle_input(key_event)
         if key_event.type == pygame.KEYDOWN:
-            match key_event.key:
-                case pygame.K_a | pygame.K_LEFT:
-                    self._scroll_left = True
-                case pygame.K_d | pygame.K_RIGHT:
-                    self._scroll_right = True
-                case pygame.K_g:
-                    self._show_grid = False if self._show_grid else True
-                case pygame.K_ESCAPE:
-                    self.metadata['game_mode'] = 'GameStart'
-                case pygame.K_s:
-                    com_fuc.write_world_data(self._world_data_path, self._world_data)
+            if pygame.key in [pygame.K_a, pygame.K_LEFT]:
+                self._scroll_left = True
+            elif pygame.key in [pygame.K_d, pygame.K_RIGHT]:
+                self._scroll_right = True
+            elif pygame.key == pygame.K_g:
+                self._show_grid = False if self._show_grid else True
+            elif pygame.key == pygame.K_ESCAPE:
+                self.metadata['game_mode'] = 'GameStart'
+            elif pygame.key == pygame.K_s:
+                com_fuc.write_world_data(self._world_data_path, self._world_data)
         elif key_event.type == pygame.KEYUP:
-            match key_event.key:
-                case pygame.K_a | pygame.K_LEFT:
-                    self._scroll_left = False
-                case pygame.K_d | pygame.K_RIGHT:
-                    self._scroll_right = False
+            if key_event.key in [pygame.K_a, pygame.K_LEFT]:
+                self._scroll_left = False
+            elif pygame.key in [pygame.K_d, pygame.K_RIGHT]:
+                self._scroll_right = False
         self._draw_tiles(key_event)
 
     def update(self, _) -> None:
@@ -196,13 +194,12 @@ class GameEditor(GameManager):
             x, y, img = data_info['x'], data_info['y'], data_info['img']
             tile_name = f'{img_type}_{img}.png'
             img_surface: surface.Surface|None = None
-            match img_type:
-                case settings.IMG_TYPE_TILES:
-                    img_surface = self._tiles_images[tile_name]
-                case settings.IMG_TYPE_SPRITES:
-                    img_surface = self._sprite_images[tile_name]
-                case settings.IMG_TYPE_ITEMS:
-                    img_surface = self._item_images[tile_name]
+            if img_type == settings.IMG_TYPE_TILES:
+                img_surface = self._tiles_images[tile_name]
+            elif img_type == settings.IMG_TYPE_SPRITES:
+                img_surface = self._sprite_images[tile_name]
+            elif img_type == settings.IMG_TYPE_ITEMS:
+                img_surface = self._item_images[tile_name]
             if img_surface is not None:
                 screen.blit(img_surface, Vector2(x*32 + self._surface_scroll_value, y*32))
 
