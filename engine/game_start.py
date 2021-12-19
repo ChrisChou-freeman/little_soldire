@@ -58,19 +58,18 @@ class GameStart(GameManager):
 
     def handle_input(self, key_event: event.Event) -> None:
         if key_event.type == pygame.KEYDOWN:
-            match key_event.key:
-                case pygame.K_w | pygame.K_UP:
-                    self._select_menu_key -= 1
-                    if self._select_menu_key < 0:
-                        self._select_menu_key = 0
-                    self._key_menu_select_handle()
-                case pygame.K_s | pygame.K_DOWN:
-                    self._select_menu_key += 1
-                    if self._select_menu_key > len(self._menus) -1:
-                        self._select_menu_key = len(self._menus) -1
-                    self._key_menu_select_handle()
-                case pygame.K_RETURN:
-                    self.metadata['game_mode'] = self._menu_list[self._select_menu_key]
+            if key_event.key in [pygame.K_w, pygame.K_UP]:
+                self._select_menu_key -= 1
+                if self._select_menu_key < 0:
+                    self._select_menu_key = 0
+                self._key_menu_select_handle()
+            elif key_event.key in [pygame.K_s, pygame.K_DOWN]:
+                self._select_menu_key += 1
+                if self._select_menu_key > len(self._menus) -1:
+                    self._select_menu_key = len(self._menus) -1
+                self._key_menu_select_handle()
+            elif  key_event.key == pygame.K_RETURN:
+                self.metadata['game_mode'] = self._menu_list[self._select_menu_key]
 
     def update(self, dt: float) -> None:
         self.cloud_sprites.update(dt=dt)
