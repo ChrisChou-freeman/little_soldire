@@ -59,6 +59,19 @@ class WorldDataStruct:
         elif img_type == settings.IMG_TYPE_ITEMS:
             self.items_data.append(img_info)
 
+    def set_unset_tile_collition(self, tile_type: str, tile: int) -> None:
+        if self.collition_data.get(tile_type) is None:
+            self.collition_data[tile_type] = []
+        if tile in self.collition_data[tile_type]:
+            self.collition_data[tile_type].remove(tile)
+            return
+        self.collition_data[tile_type].append (tile)
+
+    def is_colliction(self, tile_type: str, tile: int) -> bool:
+        if self.collition_data.get(tile_type) is None:
+            return False
+        return tile in self.collition_data[tile_type]
+
     def collections_detect_x(self, rect: rect.Rect, x_speed: int) -> int:
         return x_speed
 

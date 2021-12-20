@@ -1,15 +1,17 @@
 import sys
 
 import pygame
-from pygame import event, display, surface
+from pygame import event, display, surface, Vector2
 
 from . import settings, game_start, game_editor
 from .lib import GameManager
+from .ui import Tip
 
 class MainGame:
     def __init__(self) -> None:
         pygame.init()
         self._screen = self._create_screen()
+        self._clock = pygame.time.Clock()
         self._game_metadata = {
             'game_mode': 'GameStart',
             'level_edit_tile': ''
@@ -32,9 +34,16 @@ class MainGame:
         if self._game_manager is not None:
             self._game_manager.handle_input(key_event)
 
+    def _draw_fps(self) -> None:
+        if not settings.SHOW_FPS:
+            return
+        tip_obj = Tip(f'FPS:{round(self._clock.get_fps())}', Vector2(settings.SCREEN_WIDTH - 20, 25), 25)
+        tip_obj.draw(self._screen)
+
     def _draw(self) -> None:
         if self._game_manager is not None:
             self._game_manager.draw(self._screen)
+        self._draw_fps()
 
     def _update(self, dt: float) -> None:
         if self._game_manager is not None:
@@ -46,7 +55,6 @@ class MainGame:
         sys.exit()
 
     def run(self) -> None:
-        clock = pygame.time.Clock()
         while True:
             switch_mode = self._game_metadata['game_mode']
             if switch_mode == 'Quit':
@@ -58,6 +66,6 @@ class MainGame:
             for key_event in event.get():
                 self._handle_input(key_event)
             self._draw()
-            self._update(float(clock.get_time()/1000))
-            clock.tick(settings.FPS)
+            self._update(float(self._clock.get_time()/1000))
+            self._clock.tick(settings.FPS)
 

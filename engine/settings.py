@@ -1,6 +1,7 @@
 import os
 
 FULL_SCRREN = False
+SHOW_FPS = True
 FPS = 60
 SCREEN_ORG_WIDTH = 800
 SCREEN_ORG_HEIGHT = 450
