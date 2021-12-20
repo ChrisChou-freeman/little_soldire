@@ -1,7 +1,7 @@
 import os
 
 import pygame
-from pygame import surface, event, Vector2, draw, image
+from pygame import surface, event, Vector2, draw, image, rect
 
 from  . import settings
 from .ui import Button, ButtonContainer, Tip
@@ -9,8 +9,9 @@ from .lib import GameManager, com_fuc, com_type
 
 TIP_MSG = {
     'regular': [
-        's to save',
+        's to save changes',
         'g to show or hide Grid Line',
+        'c set selected tile \'s collision'
     ],
     'show_container': [
         '<tab> to switch tiles'
@@ -152,20 +153,23 @@ class GameEditor(GameManager):
         self._tiles_button.handle_input(key_event, self._tiles_button_click)
         self._menu_container.handle_input(key_event)
         if key_event.type == pygame.KEYDOWN:
-            if pygame.key in [pygame.K_a, pygame.K_LEFT]:
+            if key_event.key in [pygame.K_a, pygame.K_LEFT]:
                 self._scroll_left = True
-            elif pygame.key in [pygame.K_d, pygame.K_RIGHT]:
+            elif key_event.key in [pygame.K_d, pygame.K_RIGHT]:
                 self._scroll_right = True
-            elif pygame.key == pygame.K_g:
+            elif key_event.key == pygame.K_g:
                 self._show_grid = False if self._show_grid else True
-            elif pygame.key == pygame.K_ESCAPE:
+            elif key_event.key == pygame.K_ESCAPE:
                 self.metadata['game_mode'] = 'GameStart'
-            elif pygame.key == pygame.K_s:
+            elif key_event.key == pygame.K_s:
                 com_fuc.write_world_data(self._world_data_path, self._world_data)
+            elif key_event.key == pygame.K_c and self.metadata['level_edit_tile'] != '':
+                tile_type, tile = self.metadata['level_edit_tile'].split('.')[0].split('_')
+                self._world_data.set_unset_tile_collition(tile_type, int(tile))
         elif key_event.type == pygame.KEYUP:
             if key_event.key in [pygame.K_a, pygame.K_LEFT]:
                 self._scroll_left = False
-            elif pygame.key in [pygame.K_d, pygame.K_RIGHT]:
+            elif key_event.key in [pygame.K_d, pygame.K_RIGHT]:
                 self._scroll_right = False
         self._draw_tiles(key_event)
 
@@ -186,6 +190,15 @@ class GameEditor(GameManager):
             )
             draw.line(screen, settings.RGB_WHITE, start_point, eng_point)
 
+    def _draw_collition_box(self,
+                            screen: surface.Surface,
+                            tile_type: str,
+                            tile: int,
+                            rect_obj: rect.Rect) -> None:
+        if not self._world_data.is_colliction(tile_type, tile):
+            return
+        draw.rect(screen, settings.RGB_RED, rect_obj, 1)
+
     def _rander_world_data(self,
             screen: surface.Surface,
             datas_info: list[dict[str, int]],
@@ -200,8 +213,16 @@ class GameEditor(GameManager):
                 img_surface = self._sprite_images[tile_name]
             elif img_type == settings.IMG_TYPE_ITEMS:
                 img_surface = self._item_images[tile_name]
+            x_pos = x * settings.TILE_SIZE[0] + self._surface_scroll_value
+            y_pos = y * settings.TILE_SIZE[1]
             if img_surface is not None:
-                screen.blit(img_surface, Vector2(x*32 + self._surface_scroll_value, y*32))
+                screen.blit(img_surface, Vector2(x_pos, y_pos))
+                self._draw_collition_box(
+                    screen,
+                    img_type,
+                    img,
+                    rect.Rect(x_pos, y_pos, img_surface.get_width(), img_surface.get_height())
+                )
 
     def _draw_tips(self, screen: surface.Surface) -> None:
         tips_list: list[Tip] = []
