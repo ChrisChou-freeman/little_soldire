@@ -11,7 +11,7 @@ TIP_MSG = {
     'regular': [
         's to save changes',
         'g to show or hide Grid Line',
-        'c set selected tile \'s collision'
+        'c set selected tile\'s collision'
     ],
     'show_container': [
         '<tab> to switch tiles'
@@ -118,7 +118,7 @@ class GameEditor(GameManager):
             return False
         return True
 
-    def _draw_tiles(self, key_event: event.Event) -> None:
+    def _set_tiles(self, key_event: event.Event) -> None:
         if key_event.type == pygame.MOUSEBUTTONDOWN:
             if key_event.button == pygame.BUTTON_LEFT:
                 self._holde_mouse_left = True
@@ -144,10 +144,10 @@ class GameEditor(GameManager):
                     'y': tile_y,
                     'img': int(tile_name.split('.')[0])
                 }
-                self._world_data.add_img_by_type(png_data, tile_type)
+                self._world_data.add_tile_by_type(png_data, tile_type)
             elif self._holde_mouse_right \
                     and self._has_grid_area(key_event):
-                self._world_data.delete_img_by_pos(tile_x, tile_y)
+                self._world_data.delete_tile_by_pos(tile_x, tile_y)
 
     def handle_input(self, key_event: event.Event) -> None:
         self._tiles_button.handle_input(key_event, self._tiles_button_click)
@@ -157,6 +157,14 @@ class GameEditor(GameManager):
                 self._scroll_left = True
             elif key_event.key in [pygame.K_d, pygame.K_RIGHT]:
                 self._scroll_right = True
+            elif key_event.key in [pygame.K_w, pygame.K_UP]:
+                self._current_level -= 1
+                if self._current_level < 0:
+                    self._current_level = 0
+            elif key_event.key in [pygame.K_s, pygame.K_DOWN]:
+                self._current_level += 1
+                if self._current_level > settings.MAX_LEVEL:
+                    self._current_level = settings.MAX_LEVEL
             elif key_event.key == pygame.K_g:
                 self._show_grid = False if self._show_grid else True
             elif key_event.key == pygame.K_ESCAPE:
@@ -171,7 +179,7 @@ class GameEditor(GameManager):
                 self._scroll_left = False
             elif key_event.key in [pygame.K_d, pygame.K_RIGHT]:
                 self._scroll_right = False
-        self._draw_tiles(key_event)
+        self._set_tiles(key_event)
 
     def update(self, _) -> None:
         self._scroll_backgroud()
@@ -199,7 +207,7 @@ class GameEditor(GameManager):
             return
         draw.rect(screen, settings.RGB_RED, rect_obj, 1)
 
-    def _rander_world_data(self,
+    def _draw_world_data(self,
             screen: surface.Surface,
             datas_info: list[dict[str, int]],
             img_type: str) -> None:
@@ -233,17 +241,23 @@ class GameEditor(GameManager):
         for tip in tips_list:
             tip.draw(screen)
 
+    def _draw_level_number(self, screen: surface.Surface) -> None:
+        position = Vector2(settings.SCREEN_WIDTH - 20, 40)
+        tip_obj = Tip(f'current level:{self._current_level}', position, 25)
+        tip_obj.draw(screen)
+
     def draw(self, screen: surface.Surface) -> None:
         for index,lay_pos in enumerate(self._background_lays_pos):
             lay = self._background_lays[index%len(self._background_lays)]
             screen.blit(lay, lay_pos)
         self._draw_grid(screen)
-        self._rander_world_data(screen, self._world_data.tiles_data, settings.IMG_TYPE_TILES)
-        self._rander_world_data(screen, self._world_data.items_data, settings.IMG_TYPE_ITEMS)
-        self._rander_world_data(screen, self._world_data.sprites_data, settings.IMG_TYPE_SPRITES)
+        self._draw_world_data(screen, self._world_data.tiles_data, settings.IMG_TYPE_TILES)
+        self._draw_world_data(screen, self._world_data.items_data, settings.IMG_TYPE_ITEMS)
+        self._draw_world_data(screen, self._world_data.sprites_data, settings.IMG_TYPE_SPRITES)
         self._tiles_button.draw(screen)
         self._menu_container.draw(screen)
         self._draw_tips(screen)
+        self._draw_level_number(screen)
 
     def clear(self, screen: surface.Surface) -> None:
         self._background_lays = []
