@@ -1,9 +1,8 @@
 import os
 
 from pygame import surface, event, sprite, image, Vector2
-import pygame
 
-from .lib import GameManager
+from .lib import GameManager, KeyMap
 from .ui import Menu
 from .sprite import CloudSprite
 from . import settings
@@ -25,9 +24,9 @@ class GameStart(GameManager):
         self._menu_size = 45
         self._menu_gap = 40
         self._menu_list = [
-            'Play',
-            'EditGame',
-            'Quit'
+            settings.GAME_PLAY,
+            settings.GAME_EDITOR,
+            settings.GAME_EXIT
         ]
         self._menus: list[Menu] = []
         self._select_menu_key = 0
@@ -51,25 +50,27 @@ class GameStart(GameManager):
 
     def _key_menu_select_handle(self) -> None:
         for index, menu in enumerate(self._menus):
-            if index == self._select_menu_key:
-                menu.be_select = True
-            else:
-                menu.be_select = False
+            menu.be_select = True if index == self._select_menu_key else False
+
+    def _menus_swich(self, mode: str) -> None:
+        val = 1
+        if mode == 'up':
+            val *= -1
+        self._select_menu_key += val
+        if self._select_menu_key < 0:
+            self._select_menu_key = 0
+        elif self._select_menu_key > len(self._menus) - 1:
+            self._select_menu_key = len(self._menus) - 1
+        self._key_menu_select_handle()
 
     def handle_input(self, key_event: event.Event) -> None:
-        if key_event.type == pygame.KEYDOWN:
-            if key_event.key in [pygame.K_w, pygame.K_UP]:
-                self._select_menu_key -= 1
-                if self._select_menu_key < 0:
-                    self._select_menu_key = 0
-                self._key_menu_select_handle()
-            elif key_event.key in [pygame.K_s, pygame.K_DOWN]:
-                self._select_menu_key += 1
-                if self._select_menu_key > len(self._menus) -1:
-                    self._select_menu_key = len(self._menus) -1
-                self._key_menu_select_handle()
-            elif  key_event.key == pygame.K_RETURN:
-                self.metadata['game_mode'] = self._menu_list[self._select_menu_key]
+        key_map = KeyMap(key_event)
+        if key_map.key_up_press():
+            self._menus_swich('up')
+        elif key_map.key_down_press():
+            self._menus_swich('down')
+        elif key_map.key_enter_press():
+            self.metadata['game_mode'] = self._menu_list[self._select_menu_key]
 
     def update(self, dt: float) -> None:
         self.cloud_sprites.update(dt=dt)

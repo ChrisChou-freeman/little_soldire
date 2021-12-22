@@ -3,7 +3,7 @@ import sys
 import pygame
 from pygame import event, display, surface, Vector2
 
-from . import settings, game_start, game_editor
+from . import settings, game_start, game_editor, game_play
 from .lib import GameManager
 from .ui import Tip
 
@@ -13,19 +13,20 @@ class MainGame:
         self._screen = self._create_screen()
         self._clock = pygame.time.Clock()
         self._game_metadata = {
-            'game_mode': 'GameStart',
+            'game_mode': settings.GAME_START,
             'level_edit_tile': ''
         }
         self._game_mode: dict[str, type[GameManager]] = {
-            'GameStart': game_start.GameStart,
-            'EditGame': game_editor.GameEditor
+            settings.GAME_START: game_start.GameStart,
+            settings.GAME_EDITOR: game_editor.GameEditor,
+            settings.GAME_PLAY: game_play.GamePlay
         }
         self._game_manager: GameManager|None = None
 
     def _create_screen(self) -> surface.Surface:
         flag = pygame.FULLSCREEN|pygame.SCALED if settings.FULL_SCRREN else 0
         screen = display.set_mode((settings.SCREEN_WIDTH, settings.SCREEN_HEIGHT), flag)
-        display.set_caption('little soldire')
+        display.set_caption(settings.GAME_TITLE)
         return screen
 
     def _handle_input(self, key_event: event.Event) -> None:
@@ -57,7 +58,7 @@ class MainGame:
     def run(self) -> None:
         while True:
             switch_mode = self._game_metadata['game_mode']
-            if switch_mode == 'Quit':
+            if switch_mode == settings.GAME_EXIT:
                 self._quit()
             if not isinstance(self._game_manager, self._game_mode[switch_mode]):
                 if self._game_manager is not None:
