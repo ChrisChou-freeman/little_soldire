@@ -5,16 +5,16 @@ from pygame import surface, event, Vector2, draw, image, rect
 
 from  . import settings
 from .ui import Button, ButtonContainer, Tip
-from .lib import GameManager, com_fuc, com_type
+from .lib import GameManager, com_fuc, com_type, KeyMap
 
 TIP_MSG = {
     'regular': [
-        's to save changes',
-        'g to show or hide Grid Line',
-        'c set selected tile\'s collision'
+        's : Save',
+        'g : Grid',
+        'c : Collision'
     ],
     'show_container': [
-        '<tab> to switch tiles'
+        '<tab> switch tiles'
     ]
 }
 
@@ -52,18 +52,17 @@ class GameEditor(GameManager):
 
     def _init_content(self) -> None:
         # init background
-        last_backgrad_width = self._background_lays[-1].get_width()
-        self._background_lays_pos = [Vector2(r * last_backgrad_width, i*80) \
+        last_layer_width = self._background_lays[-1].get_width()
+        self._background_lays_pos = [Vector2(r * last_layer_width, i*80) \
                 for r in range(self._layers_repets) \
                 for i in range(len(self._background_lays))]
-        last_layer_width = self._background_lays[-1].get_width()
+        # init grid
         for y_line in range(0, settings.SCREEN_HEIGHT, settings.TILE_SIZE[1]):
             line = com_type.Line(
                 Vector2(0, y_line),
                 Vector2(last_layer_width*self._layers_repets, y_line)
             )
             self._grid_line.append(line)
-        # init grid
         for x_line in range(0, last_layer_width*self._layers_repets, settings.TILE_SIZE[0]):
             line = com_type.Line(
                 Vector2(x_line, 0),
@@ -119,6 +118,7 @@ class GameEditor(GameManager):
         return True
 
     def _set_tiles(self, key_event: event.Event) -> None:
+        '''draw tiles in editor mode'''
         if key_event.type == pygame.MOUSEBUTTONDOWN:
             if key_event.button == pygame.BUTTON_LEFT:
                 self._holde_mouse_left = True
@@ -137,7 +137,6 @@ class GameEditor(GameManager):
             if self._holde_mouse_left \
                     and self._has_grid_area(key_event) \
                     and self.metadata['level_edit_tile'] != '':
-                # draw tiles
                 tile_type, tile_name = self.metadata['level_edit_tile'].split('_')
                 png_data = {
                     'x': tile_x,
@@ -149,36 +148,42 @@ class GameEditor(GameManager):
                     and self._has_grid_area(key_event):
                 self._world_data.delete_tile_by_pos(tile_x, tile_y)
 
+    def _level_swich(self, mode: str) -> None:
+        val = 1
+        if mode == 'minus':
+            val *= -1
+        self._current_level += val
+        if self._current_level < 0:
+            self._current_level = 0
+        elif self._current_level > settings.MAX_LEVEL:
+            self._current_level = settings.MAX_LEVEL
+
+
     def handle_input(self, key_event: event.Event) -> None:
         self._tiles_button.handle_input(key_event, self._tiles_button_click)
         self._menu_container.handle_input(key_event)
-        if key_event.type == pygame.KEYDOWN:
-            if key_event.key in [pygame.K_a, pygame.K_LEFT]:
-                self._scroll_left = True
-            elif key_event.key in [pygame.K_d, pygame.K_RIGHT]:
-                self._scroll_right = True
-            elif key_event.key in [pygame.K_w, pygame.K_UP]:
-                self._current_level -= 1
-                if self._current_level < 0:
-                    self._current_level = 0
-            elif key_event.key in [pygame.K_s, pygame.K_DOWN]:
-                self._current_level += 1
-                if self._current_level > settings.MAX_LEVEL:
-                    self._current_level = settings.MAX_LEVEL
-            elif key_event.key == pygame.K_g:
-                self._show_grid = False if self._show_grid else True
-            elif key_event.key == pygame.K_ESCAPE:
-                self.metadata['game_mode'] = 'GameStart'
-            elif key_event.key == pygame.K_s:
-                com_fuc.write_world_data(self._world_data_path, self._world_data)
-            elif key_event.key == pygame.K_c and self.metadata['level_edit_tile'] != '':
-                tile_type, tile = self.metadata['level_edit_tile'].split('.')[0].split('_')
-                self._world_data.set_unset_tile_collition(tile_type, int(tile))
-        elif key_event.type == pygame.KEYUP:
-            if key_event.key in [pygame.K_a, pygame.K_LEFT]:
-                self._scroll_left = False
-            elif key_event.key in [pygame.K_d, pygame.K_RIGHT]:
-                self._scroll_right = False
+        key_map = KeyMap(key_event)
+        if key_map.key_left_press():
+            self._scroll_left = True
+        elif key_map.key_right_press():
+            self._scroll_right = True
+        elif key_map.key_left_release():
+            self._scroll_left = False
+        elif key_map.key_right_release():
+            self._scroll_right = False
+        elif key_map.key_up_press():
+            self._level_swich('plus')
+        elif key_map.key_down_press():
+            self._level_swich('mines')
+        elif key_map.key_g_press():
+            self._show_grid = False if self._show_grid else True
+        elif key_map.key_back_press():
+            self.metadata['game_mode'] = settings.GAME_START
+        elif key_map.key_s_press():
+            com_fuc.write_world_data(self._world_data_path, self._world_data)
+        elif  key_map.key_c_press() and self.metadata['level_edit_tile'] != '':
+            tile_type, tile = self.metadata['level_edit_tile'].split('.')[0].split('_')
+            self._world_data.set_unset_tile_collition(tile_type, int(tile))
         self._set_tiles(key_event)
 
     def update(self, _) -> None:
@@ -233,6 +238,7 @@ class GameEditor(GameManager):
                 )
 
     def _draw_tips(self, screen: surface.Surface) -> None:
+        '''draw key function tip messages in screen'''
         tips_list: list[Tip] = []
         if self._menu_container.show:
             tips_list = self._tip['show_container']

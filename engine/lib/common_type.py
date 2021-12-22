@@ -1,5 +1,6 @@
 from typing import NamedTuple
 from dataclasses import dataclass
+from enum import Enum, auto
 
 from pygame import Vector2, rect
 
@@ -8,6 +9,12 @@ from .. import settings
 class Line(NamedTuple):
     start_point: Vector2
     eng_point: Vector2
+
+class GameMode(Enum):
+    GAME_START = auto()
+    GAME_PLAY = auto()
+    GAME_EDITE = auto()
+    GAME_EXIT = auto()
 
 @dataclass
 class WorldDataStruct:
