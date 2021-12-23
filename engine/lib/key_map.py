@@ -23,25 +23,36 @@ class KeyMap:
         return self._key_event.key in [pygame.K_s, pygame.K_DOWN]
     def key_right_press(self) -> bool:
         return self._key_press() and self._key_right()
+    def key_right_release(self) -> bool:
+        return self._key_release() and self._key_right()
     def key_left_press(self) -> bool:
         return self._key_press() and self._key_left()
+    def key_left_release(self) -> bool:
+        return self._key_release() and self._key_left()
     def key_up_press(self) -> bool:
         return self._key_press() and self._key_up()
     def key_down_press(self) -> bool:
         return self._key_press() and self._key_down()
-    def key_left_release(self) -> bool:
-        return self._key_release() and self._key_left()
-    def key_right_release(self) -> bool:
-        return self._key_release() and self._key_right()
     # direction keys end
+
+    # action keys
+    def key_attack_press(self) -> bool:
+        return self._key_press() and self._key_event.key == pygame.K_j
+    def key_attack_release(self) -> bool:
+        return self._key_release() and self._key_event.key == pygame.K_j
+    def key_jump_press(self) -> bool:
+        return self._key_press() and self._key_event.key == pygame.K_k
+    # action keys eng
 
     # other function key
     def key_back_press(self) -> bool:
         return self._key_press() and self._key_event.key == pygame.K_ESCAPE
     def key_enter_press(self) -> bool:
-        return self.key_g_press() and self._key_event.key == pygame.K_RETURN
+        return self._key_press() and self._key_event.key == pygame.K_RETURN
     def key_g_press(self) -> bool:
         return self._key_press() and self._key_event.key == pygame.K_g
+    def key_q_press(self) -> bool:
+        return self._key_press() and self._key_event.key == pygame.K_q
     def key_s_press(self) -> bool:
         return self._key_press() and self._key_event.key == pygame.K_s
     def key_c_press(self) -> bool:

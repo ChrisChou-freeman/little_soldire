@@ -53,6 +53,7 @@ class GameStart(GameManager):
             menu.be_select = True if index == self._select_menu_key else False
 
     def _menus_swich(self, mode: str) -> None:
+        '''change current selected menu'''
         val = 1
         if mode == 'up':
             val *= -1
