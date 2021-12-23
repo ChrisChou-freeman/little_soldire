@@ -174,7 +174,7 @@ class GameEditor(GameManager):
         elif key_map.key_up_press():
             self._level_swich('plus')
         elif key_map.key_down_press():
-            self._level_swich('mines')
+            self._level_swich('minus')
         elif key_map.key_g_press():
             self._show_grid = False if self._show_grid else True
         elif key_map.key_back_press():
