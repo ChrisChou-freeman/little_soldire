@@ -53,8 +53,10 @@ class KeyMap:
         return self._key_press() and self._key_event.key == pygame.K_g
     def key_q_press(self) -> bool:
         return self._key_press() and self._key_event.key == pygame.K_q
-    def key_s_press(self) -> bool:
-        return self._key_press() and self._key_event.key == pygame.K_s
+    def key_l_press(self) -> bool:
+        return self._key_press() and self._key_event.key == pygame.K_l
+    def key_F1_press(self) -> bool:
+        return self._key_press() and self._key_event.key == pygame.K_F1
     def key_c_press(self) -> bool:
         return self._key_press() and self._key_event.key == pygame.K_c
     # other function key end

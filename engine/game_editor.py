@@ -5,11 +5,11 @@ from pygame import surface, event, Vector2, draw, image, rect
 
 from  . import settings
 from .ui import Button, ButtonContainer, Tip
-from .lib import GameManager, com_fuc, com_type, KeyMap
+from .lib import GameManager, com_fuc, com_type, KeyMap, GameDataStruct
 
 TIP_MSG = {
     'regular': [
-        's : Save',
+        'F1 : Save',
         'g : Grid',
         'c : Collision'
     ],
@@ -46,7 +46,7 @@ class GameEditor(GameManager):
         self._holde_mouse_right = False
         self._surface_scroll_value = 0
         self._world_data_path = os.path.join(settings.WORLD_DATA_PATH, f'{self._current_level}.pk')
-        self._world_data = com_fuc.load_world_data(self._world_data_path)
+        self._world_data = GameDataStruct.load_world_data(self._world_data_path)
         self._tip: dict[str, list[Tip]] = {}
         self._init_content()
 
@@ -158,7 +158,6 @@ class GameEditor(GameManager):
         elif self._current_level > settings.MAX_LEVEL:
             self._current_level = settings.MAX_LEVEL
 
-
     def handle_input(self, key_event: event.Event) -> None:
         self._tiles_button.handle_input(key_event, self._tiles_button_click)
         self._menu_container.handle_input(key_event)
@@ -179,8 +178,8 @@ class GameEditor(GameManager):
             self._show_grid = False if self._show_grid else True
         elif key_map.key_back_press():
             self.metadata['game_mode'] = settings.GAME_START
-        elif key_map.key_s_press():
-            com_fuc.write_world_data(self._world_data_path, self._world_data)
+        elif key_map.key_F1_press():
+            self._world_data.write_world_data(self._world_data_path)
         elif  key_map.key_c_press() and self.metadata['level_edit_tile'] != '':
             tile_type, tile = self.metadata['level_edit_tile'].split('.')[0].split('_')
             self._world_data.set_unset_tile_collition(tile_type, int(tile))
@@ -266,6 +265,5 @@ class GameEditor(GameManager):
         self._draw_level_number(screen)
 
     def clear(self, screen: surface.Surface) -> None:
-        self._background_lays = []
         screen.fill(settings.RGB_BLACK)
 
