@@ -1,23 +1,26 @@
-from pygame import surface, Vector2
+from pygame import Vector2, image
 
 from .animation_sprite import AnimationSprite
 
-class Role(AnimationSprite):
+class RoleSprite:
     def __init__(self,
-                 image_sheet: surface.Surface,
-                 position: Vector2,
-                 fram_with: int,
-                 loop: bool,
-                 health_bar: int) -> None:
-        super().__init__(image_sheet, position, fram_with, loop)
-        self.health_bar = health_bar
-        self._alive = True
+                 sprite_sheet_info: dict[str, dict[str, str]],
+                 position: Vector2) -> None:
+        self.position = position
+        self._sprite_sheet_info = sprite_sheet_info
+        self._animation_map: dict[str, AnimationSprite] = {}
+        self._load_animation()
 
+    def _load_animation(self) -> None:
+        for name, info in self._sprite_sheet_info.items():
+            img_sheet = image.load(info['image_sheet'])
+            is_loop = True if info['loop'] == '1' else False
+            animation_sprite = AnimationSprite(img_sheet, self.position, int(info['fram_with']), is_loop)
+            self._animation_map[name] = animation_sprite
 
-    def update(self, *_, **__) -> None:
-        self.play()
-
-    def move(self, vec: Vector2) -> None:
-        if self.rect is None:
+    def play(self, action: str) -> None:
+        action_a_sprite = self._animation_map.get(action, None)
+        if action_a_sprite is None:
             return
-        self.rect.move(vec.x, vec.y)
+        action_a_sprite.play()
+

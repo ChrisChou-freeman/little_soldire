@@ -3,6 +3,7 @@ import os
 from pygame import surface, event, Vector2
 
 from .lib import GameManager, com_fuc, KeyMap, GameDataStruct
+# from .sprite import
 from . import settings
 
 class GamePlay(GameManager):
@@ -57,6 +58,17 @@ class GamePlay(GameManager):
     def update(self, dt: float) -> None:
         ...
 
+    def _draw_sprite(self,
+                     screen: surface.Surface,
+                     sprite: int,
+                     position: Vector2) -> None:
+        sprite_img_path_map: dict[str, dict[str, str]] = {}
+        if sprite in settings.PLAYER_TILES:
+            sprite_img_path_map = settings.PLAYER1_IMG_PATH_MAP
+        elif sprite in settings.ENEMY_TILES:
+            sprite_img_path_map = settings.ENEMY1_IMG_PATH_MAP
+        idle_sheet = sprite_img_path_map['idle']
+
     def _draw_world_data(self,
             screen: surface.Surface,
             datas_info: list[dict[str, int]],
@@ -65,16 +77,19 @@ class GamePlay(GameManager):
             x, y, img = data_info['x'], data_info['y'], data_info['img']
             tile_name = f'{img_type}_{img}.png'
             img_surface: surface.Surface|None = None
+            position = Vector2(
+                x * settings.TILE_SIZE[0] + self._surface_scroll_value,
+                y * settings.TILE_SIZE[1]
+            )
             if img_type == settings.IMG_TYPE_TILES:
                 img_surface = self._tiles_images[tile_name]
             elif img_type == settings.IMG_TYPE_SPRITES:
                 img_surface = self._sprite_images[tile_name]
+                self._draw_sprite(screen, img, position)
             elif img_type == settings.IMG_TYPE_ITEMS:
                 img_surface = self._item_images[tile_name]
-            x_pos = x * settings.TILE_SIZE[0] + self._surface_scroll_value
-            y_pos = y * settings.TILE_SIZE[1]
             if img_surface is not None:
-                screen.blit(img_surface, Vector2(x_pos, y_pos))
+                screen.blit(img_surface, position)
 
     def draw(self, screen: surface.Surface) -> None:
         for index,lay_pos in enumerate(self._background_lays_pos):
