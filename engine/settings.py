@@ -22,9 +22,55 @@ TILES_IMG_PATH = os.path.join(PRO_PATH, 'content/image/tiles')
 SPRITE_IMG_PATH = os.path.join(PRO_PATH, 'content/image/sprites')
 ITEMS_IMG_PATH = os.path.join(PRO_PATH, 'content/image/items')
 WORLD_DATA_PATH = os.path.join(PRO_PATH, 'content/data/world/')
+PLAYER1_IMG_PATH_MAP = {
+    'idle': {
+        'image_sheet': os.path.join(PRO_PATH, 'content/image/player/idle.png'),
+        'fram_with': '28',
+        'loop': '1'
+    },
+    'run': {
+        'image_sheet': os.path.join(PRO_PATH, 'content/image/player/run.png'),
+        'fram_with': '28',
+        'loop': '1'
+    },
+    'jump': {
+        'image_sheet': os.path.join(PRO_PATH, 'content/image/player/jump.png'),
+        'fram_with': '28',
+        'loop': '1'
+    },
+    'death': {
+        'image_sheet': os.path.join(PRO_PATH, 'content/image/player/death.png'),
+        'fram_with': '35',
+        'loop': '0'
+    }
+}
+ENEMY1_IMG_PATH_MAP = {
+     'idle': {
+        'image_sheet': os.path.join(PRO_PATH, 'content/image/enemy/idle.png'),
+        'fram_with': '28',
+        'loop': '1'
+    },
+    'run': {
+        'image_sheet': os.path.join(PRO_PATH, 'content/image/enemy/run.png'),
+        'fram_with': '28',
+        'loop': '1'
+    },
+    'jump': {
+        'image_sheet': os.path.join(PRO_PATH, 'content/image/enemy/jump.png'),
+        'fram_with': '28',
+        'loop': '1'
+    },
+    'death': {
+        'image_sheet': os.path.join(PRO_PATH, 'content/image/enemy/death.png'),
+        'fram_with': '35',
+        'loop': '0'
+    }
+}
 IMG_TYPE_TILES = TILES_IMG_PATH.split('/')[-1]
 IMG_TYPE_ITEMS = ITEMS_IMG_PATH.split('/')[-1]
 IMG_TYPE_SPRITES = SPRITE_IMG_PATH.split('/')[-1]
+PLAYER_TILES = [1,]
+ENEMY_TILES = [2,]
 
 # game mode
 GAME_START = 'Game Start'
