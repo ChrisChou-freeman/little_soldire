@@ -3,7 +3,7 @@ import os
 from pygame import surface, event, Vector2, sprite
 
 from .lib import GameManager, com_fuc, KeyMap, GameDataStruct
-from .sprite import RoleSprite, TileSprite, ItemSprite
+from .sprite import RoleSprite, TileSprite, ItemSprite, PlayerSprite
 from . import settings
 
 class GamePlay(GameManager):
@@ -19,6 +19,7 @@ class GamePlay(GameManager):
         self._surface_scroll_value = 0
         self._run_speed = 1 * len(self._background_lays)
         self._grenade_number = 3
+        self._gravity = 0.75
         self._run_left = False
         self._run_right = False
         self._shoot = False
@@ -28,13 +29,14 @@ class GamePlay(GameManager):
         self._enemy_sprites = sprite.Group()
         self._tile_sprite = sprite.Group()
         self._item_sprite = sprite.Group()
+        self._player_acttion = 'idle'
         self._init_content()
 
     def _init_sprite(self,
                      sprite: int,
                      position: Vector2) -> None:
         if sprite in settings.PLAYER_TILES:
-            player_sprite = RoleSprite(settings.PLAYER1_IMG_PATH_MAP, position)
+            player_sprite = PlayerSprite(settings.PLAYER1_IMG_PATH_MAP, position)
             self._player_sprite.add(player_sprite)
         elif sprite in settings.ENEMY_TILES:
             enemy_sprite = RoleSprite(settings.ENEMY1_IMG_PATH_MAP, position)
@@ -89,15 +91,20 @@ class GamePlay(GameManager):
         elif key_map.key_attack_release():
             self._shoot = False
         elif key_map.key_back_press():
-            print('back')
             self.metadata['game_mode'] = settings.GAME_START
+
+    def _get_player_vec(self) -> Vector2:
+        return Vector2()
 
     def update(self, dt: float) -> None:
         self._tile_sprite.update()
         self._item_sprite.update()
-        if self._player_sprite is not None:
-            self._player_sprite.update()
-        self._enemy_sprites.update()
+        self._player_sprite.update(
+            dt=dt,
+            vec=self._get_player_vec(),
+            action=self._player_acttion
+        )
+        self._enemy_sprites.update(dt=dt)
 
     def draw(self, screen: surface.Surface) -> None:
         for index,lay_pos in enumerate(self._background_lays_pos):
