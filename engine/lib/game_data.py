@@ -89,7 +89,7 @@ class GameDataStruct:
 
     def collections_detect_x(self, rect: rect.Rect, x_speed: int) -> int:
         detect_x = rect.right + 1 if x_speed > 0 else rect.left + 1
-        detect_y = rect.bottom
+        detect_y = rect.bottom - 1
         if self.is_colliction_by_xy(detect_x//settings.TILE_SIZE[0], detect_y//settings.TILE_SIZE[1]):
             x_speed = 0
         return x_speed
@@ -100,6 +100,9 @@ class GameDataStruct:
         if self.is_colliction_by_xy(detect_x//settings.TILE_SIZE[0], detect_y//settings.TILE_SIZE[1]):
             y_speed = 0
         return y_speed
+
+    def collections_detect(self, rect: rect.Rect, x_speed: int, y_speed:int) -> tuple[int, int]:
+        return (self.collections_detect_x(rect, x_speed), self.collections_detect_y(rect, y_speed))
 
     @classmethod
     def load_world_data(cls, world_data_path: str) -> 'GameDataStruct':
