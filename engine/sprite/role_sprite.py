@@ -1,6 +1,7 @@
-from pygame import Vector2, image, surface
+from pygame import Vector2, image
 
 from .animation_sprite import AnimationSprite
+from ..lib import GameDataStruct
 
 class RoleSprite(AnimationSprite):
     def __init__(self,
@@ -24,13 +25,17 @@ class RoleSprite(AnimationSprite):
 class PlayerSprite(RoleSprite):
     def __init__(self,
                  sprite_sheet_info: dict[str, dict[str, str]],
-                 position: Vector2) -> None:
+                 position: Vector2,
+                 world_data_obj: GameDataStruct) -> None:
         super().__init__(sprite_sheet_info, position)
+        self.world_data_obj = world_data_obj
 
     def update(self, *_, **kwargs) -> None:
         vec: Vector2 = kwargs['vec']
         action: str = kwargs['action']
         if self.rect is not None:
+            vec.x, vec.y = self.world_data_obj.collections_detect(self.rect, int(vec.x), int(vec.y))
+            print(vec)
             self.rect = self.rect.move(vec)
         if action != self._action:
             self._action = action

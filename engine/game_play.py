@@ -19,13 +19,13 @@ class GamePlay(GameManager):
         self._surface_scroll_value = 0
         self._run_speed = 1 * len(self._background_lays)
         self._grenade_number = 3
-        self._gravity = 0.75
+        self._gravity = self._run_speed/2
         self._run_left = False
         self._run_right = False
         self._shoot = False
         self._world_data_path = os.path.join(settings.WORLD_DATA_PATH, f'{self._current_level}.pk')
         self._world_data = GameDataStruct.load_world_data(self._world_data_path)
-        self._player_sprite = sprite.Group()
+        self._player_sprites = sprite.Group()
         self._enemy_sprites = sprite.Group()
         self._tile_sprite = sprite.Group()
         self._item_sprite = sprite.Group()
@@ -36,8 +36,8 @@ class GamePlay(GameManager):
                      sprite: int,
                      position: Vector2) -> None:
         if sprite in settings.PLAYER_TILES:
-            player_sprite = PlayerSprite(settings.PLAYER1_IMG_PATH_MAP, position)
-            self._player_sprite.add(player_sprite)
+            player_sprite = PlayerSprite(settings.PLAYER1_IMG_PATH_MAP, position, self._world_data)
+            self._player_sprites.add(player_sprite)
         elif sprite in settings.ENEMY_TILES:
             enemy_sprite = RoleSprite(settings.ENEMY1_IMG_PATH_MAP, position)
             self._enemy_sprites.add(enemy_sprite)
@@ -94,12 +94,18 @@ class GamePlay(GameManager):
             self.metadata['game_mode'] = settings.GAME_START
 
     def _get_player_vec(self) -> Vector2:
-        return Vector2()
+        x = 0
+        y = self._gravity
+        if self._run_left:
+            x += (self._run_speed*-1)
+        elif self._run_right:
+            x += (self._run_speed)
+        return Vector2(x, y)
 
     def update(self, dt: float) -> None:
         self._tile_sprite.update()
         self._item_sprite.update()
-        self._player_sprite.update(
+        self._player_sprites.update(
             dt=dt,
             vec=self._get_player_vec(),
             action=self._player_acttion
@@ -112,7 +118,7 @@ class GamePlay(GameManager):
             screen.blit(lay, lay_pos)
         self._tile_sprite.draw(screen)
         self._item_sprite.draw(screen)
-        self._player_sprite.draw(screen)
+        self._player_sprites.draw(screen)
 
     def clear(self, screen: surface.Surface) -> None:
         screen.fill(settings.RGB_BLACK)
