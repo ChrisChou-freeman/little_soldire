@@ -3,7 +3,7 @@ import os
 PRO_PATH = os.path.dirname(os.path.abspath(__file__))
 
 # engine stuff
-FULL_SCRREN = False
+FULL_SCRREN = True
 SHOW_FPS = True
 FPS = 60
 SCREEN_ORG_WIDTH = 800

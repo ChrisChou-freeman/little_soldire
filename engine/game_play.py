@@ -102,13 +102,21 @@ class GamePlay(GameManager):
             x += (self._run_speed)
         return Vector2(x, y)
 
+    def _get_player_acttion(self) -> str:
+        action = 'idle'
+        if self._run_left:
+            action = 'run_left'
+        elif self._run_right:
+            action = 'run_right'
+        return action
+
     def update(self, dt: float) -> None:
         self._tile_sprite.update()
         self._item_sprite.update()
         self._player_sprites.update(
             dt=dt,
             vec=self._get_player_vec(),
-            action=self._player_acttion
+            action=self._get_player_acttion()
         )
         self._enemy_sprites.update(dt=dt)
 
