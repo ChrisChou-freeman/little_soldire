@@ -4,7 +4,9 @@ class AnimationSprite(sprite.Sprite):
     def __init__(self,
                  image_sheet: surface.Surface,
                  position: Vector2,
-                 fram_with: int, loop: bool=True) -> None:
+                 fram_with: int,
+                 loop: bool=True,
+                 flip:bool=False) -> None:
         super().__init__()
         self._current_fram = 0
         self._loop = loop
@@ -15,6 +17,7 @@ class AnimationSprite(sprite.Sprite):
         self._fram_with = fram_with
         self._fram_number = self._image_sheet.get_width() / fram_with
         self.rotate_value = 0.0
+        self.flip = flip
         self.image = self._get_curren_fram()
         self.rect = self.image.get_rect()
         self.rect = self.rect.move(position)
@@ -28,7 +31,10 @@ class AnimationSprite(sprite.Sprite):
         )
 
     def _get_curren_fram(self) -> surface.Surface:
-        return transform.rotate(self._image_sheet.subsurface(self._get_curren_fram_area()), self.rotate_value)
+        image = transform.rotate(self._image_sheet.subsurface(self._get_curren_fram_area()), self.rotate_value)
+        if self.flip:
+            image = transform.flip(image, True, False)
+        return image
 
     def play(self) -> None:
         self._counter += 1
