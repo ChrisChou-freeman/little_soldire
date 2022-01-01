@@ -17,9 +17,9 @@ class GamePlay(GameManager):
         self._layers_repets = 2
         self._current_level = 0
         self._surface_scroll_value = 0
-        self._run_speed = 1 * len(self._background_lays)
+        self._run_speed = 3
         self._grenade_number = 3
-        self._gravity = self._run_speed/2
+        self._gravity = self._run_speed*0.7
         self._run_left = False
         self._run_right = False
         self._shoot = False

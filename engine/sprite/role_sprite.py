@@ -1,4 +1,4 @@
-from pygame import Vector2, image, transform
+from pygame import Vector2, image
 
 from .animation_sprite import AnimationSprite
 from ..lib import GameDataStruct
