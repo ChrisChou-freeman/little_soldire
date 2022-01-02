@@ -19,7 +19,9 @@ class GamePlay(GameManager):
         self._surface_scroll_value = 0
         self._run_speed = 3
         self._grenade_number = 3
-        self._gravity = self._run_speed*0.7
+        self._gravity = self._run_speed * 0.7
+        self._max_gravity = 5
+        self._jump_force = 0
         self._run_left = False
         self._run_right = False
         self._shoot = False
@@ -30,16 +32,17 @@ class GamePlay(GameManager):
         self._tile_sprite = sprite.Group()
         self._item_sprite = sprite.Group()
         self._player_acttion = 'idle'
+        self._player_vec = Vector2()
         self._init_content()
 
     def _init_sprite(self,
                      sprite: int,
                      position: Vector2) -> None:
         if sprite in settings.PLAYER_TILES:
-            player_sprite = PlayerSprite(settings.PLAYER1_IMG_PATH_MAP, position, self._world_data)
+            player_sprite = PlayerSprite(settings.PLAYER1_IMG_PATH_MAP, position, self._tile_sprite)
             self._player_sprites.add(player_sprite)
         elif sprite in settings.ENEMY_TILES:
-            enemy_sprite = RoleSprite(settings.ENEMY1_IMG_PATH_MAP, position)
+            enemy_sprite = RoleSprite(settings.ENEMY1_IMG_PATH_MAP, position, self._tile_sprite)
             self._enemy_sprites.add(enemy_sprite)
 
     def _init_word_data(self,
@@ -85,7 +88,7 @@ class GamePlay(GameManager):
         elif key_map.key_q_press():
             pass
         elif key_map.key_jump_press():
-            pass
+            self._jump_force = -15
         elif key_map.key_attack_press():
             self._shoot = True
         elif key_map.key_attack_release():
@@ -95,7 +98,10 @@ class GamePlay(GameManager):
 
     def _get_player_vec(self) -> Vector2:
         x = 0
-        y = self._gravity
+        self._jump_force += int(self._gravity)
+        if self._jump_force >= self._max_gravity:
+            self._jump_force = self._max_gravity
+        y = self._jump_force
         if self._run_left:
             x += (self._run_speed*-1)
         elif self._run_right:

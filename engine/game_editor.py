@@ -1,7 +1,7 @@
 import os
 
 import pygame
-from pygame import surface, event, Vector2, draw, image, rect
+from pygame import surface, event, Vector2, draw, image
 
 from  . import settings
 from .ui import Button, ButtonContainer, Tip
@@ -11,7 +11,7 @@ TIP_MSG = {
     'regular': [
         'F1 : Save',
         'g : Grid',
-        'c : Collision'
+        # 'c : Collision'
     ],
     'show_container': [
         '<tab> switch tiles'
@@ -180,9 +180,9 @@ class GameEditor(GameManager):
             self.metadata['game_mode'] = settings.GAME_START
         elif key_map.key_F1_press():
             self._world_data.write_world_data(self._world_data_path)
-        elif  key_map.key_c_press() and self.metadata['level_edit_tile'] != '':
-            tile_type, tile = self.metadata['level_edit_tile'].split('.')[0].split('_')
-            self._world_data.set_unset_tile_collition(tile_type, int(tile))
+        # elif  key_map.key_c_press() and self.metadata['level_edit_tile'] != '':
+        #     tile_type, tile = self.metadata['level_edit_tile'].split('.')[0].split('_')
+        #     self._world_data.set_unset_tile_collition(tile_type, int(tile))
         self._set_tiles(key_event)
 
     def update(self, _) -> None:
@@ -202,14 +202,14 @@ class GameEditor(GameManager):
             )
             draw.line(screen, settings.RGB_WHITE, start_point, eng_point)
 
-    def _draw_collition_box(self,
-                            screen: surface.Surface,
-                            tile_type: str,
-                            tile: int,
-                            rect_obj: rect.Rect) -> None:
-        if not self._world_data.is_colliction(tile_type, tile):
-            return
-        draw.rect(screen, settings.RGB_RED, rect_obj, 1)
+    # def _draw_collition_box(self,
+    #                         screen: surface.Surface,
+    #                         tile_type: str,
+    #                         tile: int,
+    #                         rect_obj: rect.Rect) -> None:
+    #     if not self._world_data.is_colliction(tile_type, tile):
+    #         return
+    #     draw.rect(screen, settings.RGB_RED, rect_obj, 1)
 
     def _draw_world_data(self,
             screen: surface.Surface,
@@ -229,12 +229,12 @@ class GameEditor(GameManager):
             y_pos = y * settings.TILE_SIZE[1]
             if img_surface is not None:
                 screen.blit(img_surface, Vector2(x_pos, y_pos))
-                self._draw_collition_box(
-                    screen,
-                    img_type,
-                    img,
-                    rect.Rect(x_pos, y_pos, img_surface.get_width(), img_surface.get_height())
-                )
+                # self._draw_collition_box(
+                #     screen,
+                #     img_type,
+                #     img,
+                #     rect.Rect(x_pos, y_pos, img_surface.get_width(), img_surface.get_height())
+                # )
 
     def _draw_tips(self, screen: surface.Surface) -> None:
         '''draw key function tip messages in screen'''
