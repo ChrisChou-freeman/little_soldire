@@ -21,7 +21,8 @@ class GamePlay(GameManager):
         self._grenade_number = 3
         self._gravity = self._run_speed * 0.7
         self._max_gravity = 5
-        self._jump_force = 0
+        self._jump_force = -17
+        self._jump_vect_y = 0
         self._run_left = False
         self._run_right = False
         self._shoot = False
@@ -88,7 +89,7 @@ class GamePlay(GameManager):
         elif key_map.key_q_press():
             pass
         elif key_map.key_jump_press():
-            self._jump_force = -15
+            self._jump_vect_y = self._jump_force
         elif key_map.key_attack_press():
             self._shoot = True
         elif key_map.key_attack_release():
@@ -98,10 +99,10 @@ class GamePlay(GameManager):
 
     def _get_player_vec(self) -> Vector2:
         x = 0
-        self._jump_force += int(self._gravity)
-        if self._jump_force >= self._max_gravity:
-            self._jump_force = self._max_gravity
-        y = self._jump_force
+        self._jump_vect_y += int(self._gravity)
+        if self._jump_vect_y >= self._max_gravity:
+            self._jump_vect_y = self._max_gravity
+        y = self._jump_vect_y
         if self._run_left:
             x += (self._run_speed*-1)
         elif self._run_right:

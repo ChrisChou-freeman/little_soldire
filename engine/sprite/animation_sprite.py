@@ -42,6 +42,6 @@ class AnimationSprite(sprite.Sprite):
             if self._current_fram < self._fram_number - 1:
                 self._current_fram += 1
             elif self._current_fram == self._fram_number - 1 and self._loop:
-                self._current_fram = 1
+                self._current_fram = 0
         self.image = self._get_curren_fram()
 
