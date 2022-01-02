@@ -76,34 +76,6 @@ class GameDataStruct:
             return
         self.collition_data[tile_type].append (tile)
 
-    def is_colliction_by_xy(self, x: int, y: int) -> bool:
-        tile_type, tile_info = self._get_tile_info_by_xy(x, y)
-        if self.collition_data.get(tile_type) is None:
-            return False
-        return tile_info['img'] in self.collition_data[tile_type]
-
-    def is_colliction(self, tile_type: str, tile: int) -> bool:
-        if self.collition_data.get(tile_type) is None:
-            return False
-        return tile in self.collition_data[tile_type]
-
-    def collections_detect_x(self, rect: rect.Rect, x_speed: int) -> int:
-        detect_x = rect.right + 1 if x_speed > 0 else rect.left + 1
-        detect_y = rect.bottom - 1
-        if self.is_colliction_by_xy(detect_x//settings.TILE_SIZE[0], detect_y//settings.TILE_SIZE[1]):
-            x_speed = 0
-        return x_speed
-
-    def collections_detect_y(self, rect: rect.Rect, y_speed: int) -> int:
-        detect_x = rect.left
-        detect_y = rect.top + 1 if y_speed < 0 else rect.bottom + 1
-        if self.is_colliction_by_xy(detect_x//settings.TILE_SIZE[0], detect_y//settings.TILE_SIZE[1]):
-            y_speed = 0
-        return y_speed
-
-    def collections_detect(self, rect: rect.Rect, x_speed: int, y_speed:int) -> tuple[int, int]:
-        return (self.collections_detect_x(rect, x_speed), self.collections_detect_y(rect, y_speed))
-
     @classmethod
     def load_world_data(cls, world_data_path: str) -> 'GameDataStruct':
         world_data_obj: GameDataStruct
