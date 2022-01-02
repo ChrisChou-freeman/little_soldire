@@ -2,8 +2,6 @@ import os
 import pickle
 from dataclasses import dataclass
 
-from pygame import rect
-
 from .. import settings
 
 @dataclass

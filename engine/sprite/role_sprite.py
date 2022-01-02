@@ -42,14 +42,12 @@ class RoleSprite(AnimationSprite):
                     new_vect.y = sprite.rect.bottom - self.rect.top
         return new_vect
 
-
 class PlayerSprite(RoleSprite):
     def __init__(self,
                  sprite_sheet_info: dict[str, dict[str, str]],
                  position: Vector2,
                  tile_sprites: sprite.Group) -> None:
         super().__init__(sprite_sheet_info, position, tile_sprites)
-        # self.world_data_obj = world_data_obj
 
     def update(self, *_, **kwargs) -> None:
         vec: Vector2 = kwargs['vec']
@@ -61,8 +59,9 @@ class PlayerSprite(RoleSprite):
                 self.flip = False
             action = 'run'
         if self.rect is not None:
-            # vec.x, vec.y = self.world_data_obj.collections_detect(self.rect, int(vec.x), int(vec.y))
             vec = self._collition_detect(vec)
+            if vec.y != 0:
+                action = 'jump'
             self.rect = self.rect.move(vec)
             self.position.x, self.position.y = self.rect.x, self.rect.y
         if action != self._action:
