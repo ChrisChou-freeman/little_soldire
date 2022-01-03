@@ -1,10 +1,11 @@
 from abc import ABC, abstractmethod
-from typing import Dict
+
+from .game_data import GameMetaData
 
 from pygame import surface, event
 
 class GameManager(ABC):
-    def __init__(self, metadata: Dict[str, str]) -> None:
+    def __init__(self, metadata: GameMetaData) -> None:
         self.metadata = metadata
 
     @abstractmethod

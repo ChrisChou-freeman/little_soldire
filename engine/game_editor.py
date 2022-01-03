@@ -5,7 +5,7 @@ from pygame import surface, event, Vector2, draw, image
 
 from  . import settings
 from .ui import Button, ButtonContainer, Tip
-from .lib import GameManager, com_fuc, com_type, KeyMap, GameDataStruct
+from .lib import GameManager, com_fuc, com_type, KeyMap, GameDataStruct, GameMetaData
 
 TIP_MSG = {
     'regular': [
@@ -18,7 +18,7 @@ TIP_MSG = {
 }
 
 class GameEditor(GameManager):
-    def __init__(self, metadata: dict[str, str]) -> None:
+    def __init__(self, metadata: GameMetaData) -> None:
         super().__init__(metadata)
         self._background_lays = com_fuc.pygame_load_images_list(settings.GAME_PLAY_BACK_IMG_PATH)
         self._background_lays_pos: list[Vector2] = []
@@ -135,8 +135,8 @@ class GameEditor(GameManager):
                 return
             if self._holde_mouse_left \
                     and self._has_grid_area(key_event) \
-                    and self.metadata['level_edit_tile'] != '':
-                tile_type, tile_name = self.metadata['level_edit_tile'].split('_')
+                    and self.metadata.level_edit_tile != '':
+                tile_type, tile_name = self.metadata.level_edit_tile.split('_')
                 png_data = {
                     'x': tile_x,
                     'y': tile_y,
@@ -176,7 +176,7 @@ class GameEditor(GameManager):
         elif key_map.key_g_press():
             self._show_grid = False if self._show_grid else True
         elif key_map.key_back_press():
-            self.metadata['game_mode'] = settings.GAME_START
+            self.metadata.game_mode = settings.GAME_START
         elif key_map.key_F1_press():
             self._world_data.write_world_data(self._world_data_path)
         self._set_tiles(key_event)
