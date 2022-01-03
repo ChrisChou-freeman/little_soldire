@@ -91,11 +91,15 @@ class EnemySprite(RoleSprite):
                  tile_sprites: sprite.Group,
                  metadata: GameMetaData) -> None:
         super().__init__(sprite_sheet_info, position, tile_sprites, metadata)
+        self.ai_vect = Vector2()
+
+    def _ai(self) -> None:
+        ...
 
     def update(self, *_, **__) -> None:
         if self.rect is None:
             return
         self.rect.x += self.metadata.scroll_index
-        if self.rect.right < -20:
+        if self.rect.right < -50:
             self.kill()
 
