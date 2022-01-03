@@ -98,3 +98,4 @@ class EnemySprite(RoleSprite):
         self.rect.x += self.metadata.scroll_index
         if self.rect.right < -20:
             self.kill()
+
