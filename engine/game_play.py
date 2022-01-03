@@ -2,12 +2,12 @@ import os
 
 from pygame import surface, event, Vector2, sprite
 
-from .lib import GameManager, com_fuc, KeyMap, GameDataStruct
+from .lib import GameManager, com_fuc, KeyMap, GameDataStruct, GameMetaData
 from .sprite import RoleSprite, TileSprite, ItemSprite, PlayerSprite
 from . import settings
 
 class GamePlay(GameManager):
-    def __init__(self, metadata: dict[str, str]) -> None:
+    def __init__(self, metadata: GameMetaData) -> None:
         super().__init__(metadata)
         self._background_lays = com_fuc.pygame_load_images_list(settings.GAME_PLAY_BACK_IMG_PATH)
         self._background_lays_pos: list[Vector2] = []
@@ -95,7 +95,7 @@ class GamePlay(GameManager):
         elif key_map.key_attack_release():
             self._shoot = False
         elif key_map.key_back_press():
-            self.metadata['game_mode'] = settings.GAME_START
+            self.metadata.game_mode = settings.GAME_START
 
     def _get_player_vec(self) -> Vector2:
         x = 0

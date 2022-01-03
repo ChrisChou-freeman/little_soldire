@@ -5,6 +5,12 @@ from dataclasses import dataclass
 from .. import settings
 
 @dataclass
+class GameMetaData:
+    game_mode: str
+    level_edit_tile: str
+    scroll_index: int
+
+@dataclass
 class GameDataStruct:
     tiles_data: list[dict[str, int]]
     items_data: list[dict[str, int]]

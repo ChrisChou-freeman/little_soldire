@@ -4,7 +4,7 @@ import pygame
 from pygame import event, display, surface, Vector2
 
 from . import settings, game_start, game_editor, game_play
-from .lib import GameManager
+from .lib import GameManager, GameMetaData
 from .ui import Tip
 
 class MainGame:
@@ -12,10 +12,7 @@ class MainGame:
         pygame.init()
         self._screen = self._create_screen()
         self._clock = pygame.time.Clock()
-        self._game_metadata = {
-            'game_mode': settings.GAME_START,
-            'level_edit_tile': ''
-        }
+        self._game_metadata = GameMetaData(settings.GAME_START, '', 0)
         self._game_mode: dict[str, type[GameManager]] = {
             settings.GAME_START: game_start.GameStart,
             settings.GAME_EDITOR: game_editor.GameEditor,
@@ -57,7 +54,7 @@ class MainGame:
 
     def run(self) -> None:
         while True:
-            switch_mode = self._game_metadata['game_mode']
+            switch_mode = self._game_metadata.game_mode
             if switch_mode == settings.GAME_EXIT:
                 self._quit()
             if not isinstance(self._game_manager, self._game_mode[switch_mode]):

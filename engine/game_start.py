@@ -2,13 +2,13 @@ import os
 
 from pygame import surface, event, sprite, image, Vector2
 
-from .lib import GameManager, KeyMap
+from .lib import GameManager, KeyMap, GameMetaData
 from .ui import Menu
 from .sprite import CloudSprite
 from . import settings
 
 class GameStart(GameManager):
-    def __init__(self, metadata: dict[str, str]) -> None:
+    def __init__(self, metadata: GameMetaData) -> None:
         super().__init__(metadata)
         self.cloud_sprites = sprite.Group()
         self._background_lays: list[surface.Surface] = []
@@ -71,7 +71,7 @@ class GameStart(GameManager):
         elif key_map.key_down_press():
             self._menus_swich('down')
         elif key_map.key_enter_press():
-            self.metadata['game_mode'] = self._menu_list[self._select_menu_key]
+            self.metadata.game_mode = self._menu_list[self._select_menu_key]
 
     def update(self, dt: float) -> None:
         self.cloud_sprites.update(dt=dt)
