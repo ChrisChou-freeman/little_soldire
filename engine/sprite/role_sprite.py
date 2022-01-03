@@ -1,16 +1,20 @@
 from pygame import Vector2, image, sprite, rect
 
 from .animation_sprite import AnimationSprite
+from ..lib import GameMetaData
+from .. import settings
 
 class RoleSprite(AnimationSprite):
     def __init__(self,
                  sprite_sheet_info: dict[str, dict[str, str]],
                  position: Vector2,
-                 tile_sprites: sprite.Group) -> None:
+                 tile_sprites: sprite.Group,
+                 metadata: GameMetaData) -> None:
         self._sprite_sheet_info = sprite_sheet_info
         self._action = 'idle'
         self.position = position
         self.tile_sprites = tile_sprites
+        self.metadata = metadata
         self._set_current_action()
 
     def _set_current_action(self, flip=False) -> None:
@@ -46,8 +50,18 @@ class PlayerSprite(RoleSprite):
     def __init__(self,
                  sprite_sheet_info: dict[str, dict[str, str]],
                  position: Vector2,
-                 tile_sprites: sprite.Group) -> None:
-        super().__init__(sprite_sheet_info, position, tile_sprites)
+                 tile_sprites: sprite.Group,
+                 metadata: GameMetaData) -> None:
+        super().__init__(sprite_sheet_info, position, tile_sprites, metadata)
+
+    def move_forward_word(self) -> None:
+        if self.rect is None:
+            return
+        if self.rect.centerx < settings.SCREEN_WIDTH//2:
+            return
+        forward_distance = settings.SCREEN_WIDTH//2 - self.rect.centerx
+        self.rect.centerx = settings.SCREEN_WIDTH//2
+        self.metadata.scroll_index = forward_distance
 
     def update(self, *_, **kwargs) -> None:
         vec: Vector2 = kwargs['vec']
@@ -64,7 +78,9 @@ class PlayerSprite(RoleSprite):
                 action = 'jump'
             self.rect = self.rect.move(vec)
             self.position.x, self.position.y = self.rect.x, self.rect.y
+        self.move_forward_word()
         if action != self._action:
             self._action = action
             self._set_current_action(self.flip)
         self.play()
+

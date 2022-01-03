@@ -40,10 +40,10 @@ class GamePlay(GameManager):
                      sprite: int,
                      position: Vector2) -> None:
         if sprite in settings.PLAYER_TILES:
-            player_sprite = PlayerSprite(settings.PLAYER1_IMG_PATH_MAP, position, self._tile_sprite)
+            player_sprite = PlayerSprite(settings.PLAYER1_IMG_PATH_MAP, position, self._tile_sprite, self.metadata)
             self._player_sprites.add(player_sprite)
         elif sprite in settings.ENEMY_TILES:
-            enemy_sprite = RoleSprite(settings.ENEMY1_IMG_PATH_MAP, position, self._tile_sprite)
+            enemy_sprite = RoleSprite(settings.ENEMY1_IMG_PATH_MAP, position, self._tile_sprite, self.metadata)
             self._enemy_sprites.add(enemy_sprite)
 
     def _init_word_data(self,
@@ -58,12 +58,12 @@ class GamePlay(GameManager):
             )
             if data_type == settings.IMG_TYPE_TILES:
                 img_surface = self._tiles_images[tile_name]
-                self._tile_sprite.add(TileSprite(img_surface, position))
+                self._tile_sprite.add(TileSprite(img_surface, position, self.metadata))
             elif data_type == settings.IMG_TYPE_SPRITES:
                 self._init_sprite(img, position)
             elif data_type == settings.IMG_TYPE_ITEMS:
                 img_surface = self._item_images[tile_name]
-                self._item_sprite.add(ItemSprite(img_surface, position))
+                self._item_sprite.add(ItemSprite(img_surface, position, self.metadata))
 
     def _init_content(self) -> None:
         # init background
@@ -117,6 +117,11 @@ class GamePlay(GameManager):
             action = 'run_right'
         return action
 
+    def _update_backgroud_scroll(self) -> None:
+        for index, background_vec in enumerate(self._background_lays_pos):
+            lay_index = index%len(self._background_lays)
+            background_vec.x += self.metadata.scroll_index * ((lay_index+1)/len(self._background_lays))
+
     def update(self, dt: float) -> None:
         self._tile_sprite.update()
         self._item_sprite.update()
@@ -126,6 +131,7 @@ class GamePlay(GameManager):
             action=self._get_player_acttion()
         )
         self._enemy_sprites.update(dt=dt)
+        self._update_backgroud_scroll()
 
     def draw(self, screen: surface.Surface) -> None:
         for index,lay_pos in enumerate(self._background_lays_pos):
