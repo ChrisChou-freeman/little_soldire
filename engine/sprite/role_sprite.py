@@ -84,3 +84,17 @@ class PlayerSprite(RoleSprite):
             self._set_current_action(self.flip)
         self.play()
 
+class EnemySprite(RoleSprite):
+    def __init__(self,
+                 sprite_sheet_info: dict[str, dict[str, str]],
+                 position: Vector2,
+                 tile_sprites: sprite.Group,
+                 metadata: GameMetaData) -> None:
+        super().__init__(sprite_sheet_info, position, tile_sprites, metadata)
+
+    def update(self, *_, **__) -> None:
+        if self.rect is None:
+            return
+        self.rect.x += self.metadata.scroll_index
+        if self.rect.right < -20:
+            self.kill()

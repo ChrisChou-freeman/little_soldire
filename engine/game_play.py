@@ -3,7 +3,7 @@ import os
 from pygame import surface, event, Vector2, sprite
 
 from .lib import GameManager, com_fuc, KeyMap, GameDataStruct, GameMetaData
-from .sprite import RoleSprite, TileSprite, ItemSprite, PlayerSprite
+from .sprite import TileSprite, ItemSprite, PlayerSprite, EnemySprite
 from . import settings
 
 class GamePlay(GameManager):
@@ -43,7 +43,7 @@ class GamePlay(GameManager):
             player_sprite = PlayerSprite(settings.PLAYER1_IMG_PATH_MAP, position, self._tile_sprite, self.metadata)
             self._player_sprites.add(player_sprite)
         elif sprite in settings.ENEMY_TILES:
-            enemy_sprite = RoleSprite(settings.ENEMY1_IMG_PATH_MAP, position, self._tile_sprite, self.metadata)
+            enemy_sprite = EnemySprite(settings.ENEMY1_IMG_PATH_MAP, position, self._tile_sprite, self.metadata)
             self._enemy_sprites.add(enemy_sprite)
 
     def _init_word_data(self,
@@ -140,6 +140,7 @@ class GamePlay(GameManager):
         self._tile_sprite.draw(screen)
         self._item_sprite.draw(screen)
         self._player_sprites.draw(screen)
+        self._enemy_sprites.draw(screen)
 
     def clear(self, screen: surface.Surface) -> None:
         screen.fill(settings.RGB_BLACK)
