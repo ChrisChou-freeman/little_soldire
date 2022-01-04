@@ -2,7 +2,7 @@ import os
 
 from pygame import surface, event, Vector2, sprite
 
-from .lib import GameManager, com_fuc, KeyMap, GameDataStruct, GameMetaData
+from .lib import GameManager, com_fuc, KeyMap, GameDataStruct, GameMetaData, com_type
 from .sprite import TileSprite, ItemSprite, PlayerSprite, EnemySprite
 from . import settings
 
@@ -16,15 +16,7 @@ class GamePlay(GameManager):
         self._sprite_images = com_fuc.pygame_load_iamges_with_name(settings.SPRITE_IMG_PATH)
         self._layers_repets = 2
         self._current_level = 0
-        self._surface_scroll_value = 0
-        # self._run_speed = 3
         self._grenade_number = 3
-        # self._gravity = self._run_speed * 0.7
-        # self._max_gravity = 5
-        self._jump_force = -17
-        self._jump_vect_y = 0
-        self._run_left = False
-        self._run_right = False
         self._shoot = False
         self._world_data_path = os.path.join(settings.WORLD_DATA_PATH, f'{self._current_level}.pk')
         self._world_data = GameDataStruct.load_world_data(self._world_data_path)
@@ -32,8 +24,6 @@ class GamePlay(GameManager):
         self._enemy_sprites = sprite.Group()
         self._tile_sprite = sprite.Group()
         self._item_sprite = sprite.Group()
-        self._player_acttion = 'idle'
-        self._player_vec = Vector2()
         self._init_content()
 
     def _init_sprite(self,
@@ -53,7 +43,7 @@ class GamePlay(GameManager):
             x, y, img = data_info['x'], data_info['y'], data_info['img']
             tile_name = f'{data_type}_{img}.png'
             position = Vector2(
-                x * settings.TILE_SIZE[0] + self._surface_scroll_value,
+                x * settings.TILE_SIZE[0],
                 y * settings.TILE_SIZE[1]
             )
             if data_type == settings.IMG_TYPE_TILES:
@@ -79,43 +69,43 @@ class GamePlay(GameManager):
     def handle_input(self, key_event: event.Event) -> None:
         key_map = KeyMap(key_event)
         if key_map.key_left_press():
-            self._run_left = True
+            self.metadata.control_action.RUN_LEFT = True
         elif key_map.key_left_release():
-            self._run_left = False
+            self.metadata.control_action.RUN_LEFT = False
         elif key_map.key_right_press():
-            self._run_right = True
+            self.metadata.control_action.RUN_RIGHT = True
         elif key_map.key_right_release():
-            self._run_right = False
+            self.metadata.control_action.RUN_RIGHT = False
         elif key_map.key_q_press():
             pass
         elif key_map.key_jump_press():
-            self._jump_vect_y = self._jump_force
+            self.metadata.control_action.JUMPING = True
         elif key_map.key_attack_press():
-            self._shoot = True
+            self.metadata.control_action.SHOOT = True
         elif key_map.key_attack_release():
-            self._shoot = False
+            self.metadata.control_action.SHOOT = False
         elif key_map.key_back_press():
             self.metadata.game_mode = settings.GAME_START
 
-    def _get_player_vec(self) -> Vector2:
-        x = 0
-        self._jump_vect_y += int(settings.GRAVITY)
-        if self._jump_vect_y >= settings.MAX_GRAVITY:
-            self._jump_vect_y = settings.MAX_GRAVITY
-        y = self._jump_vect_y
-        if self._run_left:
-            x += (settings.MOVE_SPEED*-1)
-        elif self._run_right:
-            x += (settings.MOVE_SPEED)
-        return Vector2(x, y)
+    # def _get_player_vec(self) -> Vector2:
+    #     x = 0
+    #     self._jump_vect_y += int(settings.GRAVITY)
+    #     if self._jump_vect_y >= settings.MAX_GRAVITY:
+    #         self._jump_vect_y = settings.MAX_GRAVITY
+    #     y = self._jump_vect_y
+    #     if self._run_left:
+    #         x += (settings.MOVE_SPEED*-1)
+    #     elif self._run_right:
+    #         x += (settings.MOVE_SPEED)
+    #     return Vector2(x, y)
 
-    def _get_player_acttion(self) -> str:
-        action = 'idle'
-        if self._run_left:
-            action = 'run_left'
-        elif self._run_right:
-            action = 'run_right'
-        return action
+    # def _get_player_acttion(self) -> str:
+    #     action = 'idle'
+    #     if self._run_left:
+    #         action = 'run_left'
+    #     elif self._run_right:
+    #         action = 'run_right'
+    #     return action
 
     def _update_backgroud_scroll(self) -> None:
         for index, background_vec in enumerate(self._background_lays_pos):
@@ -125,11 +115,7 @@ class GamePlay(GameManager):
     def update(self, dt: float) -> None:
         self._tile_sprite.update()
         self._item_sprite.update()
-        self._player_sprites.update(
-            dt=dt,
-            vec=self._get_player_vec(),
-            action=self._get_player_acttion()
-        )
+        self._player_sprites.update(dt=dt)
         self._enemy_sprites.update(dt=dt)
         self._update_backgroud_scroll()
 

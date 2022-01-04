@@ -3,12 +3,14 @@ import pickle
 from dataclasses import dataclass
 
 from .. import settings
+from .common_type import ControlAction
 
 @dataclass
 class GameMetaData:
     game_mode: str
     level_edit_tile: str
     scroll_index: int
+    control_action: ControlAction
 
 @dataclass
 class GameDataStruct:

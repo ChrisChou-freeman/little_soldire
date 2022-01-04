@@ -1,7 +1,7 @@
 from pygame import Vector2, image, sprite, rect
 
 from .animation_sprite import AnimationSprite
-from ..lib import GameMetaData
+from ..lib import GameMetaData, com_type
 from .. import settings
 
 class RoleSprite(AnimationSprite):
@@ -12,6 +12,8 @@ class RoleSprite(AnimationSprite):
                  metadata: GameMetaData) -> None:
         self._sprite_sheet_info = sprite_sheet_info
         self._action = 'idle'
+        self._jump_vect_y = 0
+        self.falling = False
         self.position = position
         self.tile_sprites = tile_sprites
         self.metadata = metadata
@@ -25,6 +27,39 @@ class RoleSprite(AnimationSprite):
         fram_with = int(action_info['fram_with'])
         loop = True if action_info['loop'] == '1' else False
         super().__init__(image_sheet, self.position, fram_with, loop, flip)
+
+    def _get_vec_with_action(self, control_action: com_type.ControlAction) -> Vector2:
+        if control_action.JUMPING and not self.falling:
+            self._jump_vect_y = settings.JUMP_FORCE
+            self.falling = True
+        x = 0
+        self._jump_vect_y += int(settings.GRAVITY)
+        if self._jump_vect_y >= settings.MAX_GRAVITY:
+            self._jump_vect_y = settings.MAX_GRAVITY
+        y = self._jump_vect_y
+        if control_action.RUN_LEFT:
+            x += (settings.MOVE_SPEED*-1)
+        elif control_action.RUN_RIGHT:
+            x += (settings.MOVE_SPEED)
+        c_d_vect = self._collition_detect(Vector2(x, y))
+        if c_d_vect.y == 0:
+            control_action.JUMPING = False
+            self.falling = False
+        return c_d_vect
+
+    def _get_action_with_control(self, control_action: com_type.ControlAction) -> None:
+        action = 'idle'
+        if control_action.RUN_LEFT:
+            self.flip = True
+            action = 'run'
+        elif control_action.RUN_RIGHT:
+            self.flip = False
+            action = 'run'
+        elif control_action.JUMPING or self.falling:
+            action = 'jump'
+        if action != self._action:
+            self._action = action
+            self._set_current_action(self.flip)
 
     def _collition_detect(self, vect: Vector2) -> Vector2:
         new_vect = Vector2(vect.x, vect.y)
@@ -54,34 +89,20 @@ class PlayerSprite(RoleSprite):
                  metadata: GameMetaData) -> None:
         super().__init__(sprite_sheet_info, position, tile_sprites, metadata)
 
-    def move_forward_word(self) -> None:
+    def move(self) -> None:
         if self.rect is None:
             return
+        self.rect = self.rect.move(self._get_vec_with_action(self.metadata.control_action))
+        self.position.x, self.position.y = self.rect.x, self.rect.y
         if self.rect.centerx < settings.SCREEN_WIDTH//2:
             return
         forward_distance = settings.SCREEN_WIDTH//2 - self.rect.centerx
         self.rect.centerx = settings.SCREEN_WIDTH//2
         self.metadata.scroll_index = forward_distance
 
-    def update(self, *_, **kwargs) -> None:
-        vec: Vector2 = kwargs['vec']
-        action: str = kwargs['action']
-        if action.startswith('run_'):
-            if action == 'run_left':
-                self.flip = True
-            elif action == 'run_right':
-                self.flip = False
-            action = 'run'
-        if self.rect is not None:
-            vec = self._collition_detect(vec)
-            if vec.y != 0:
-                action = 'jump'
-            self.rect = self.rect.move(vec)
-            self.position.x, self.position.y = self.rect.x, self.rect.y
-        self.move_forward_word()
-        if action != self._action:
-            self._action = action
-            self._set_current_action(self.flip)
+    def update(self, *_, **__) -> None:
+        self.move()
+        self._get_action_with_control(self.metadata.control_action)
         self.play()
 
 class EnemySprite(RoleSprite):
@@ -92,14 +113,24 @@ class EnemySprite(RoleSprite):
                  metadata: GameMetaData) -> None:
         super().__init__(sprite_sheet_info, position, tile_sprites, metadata)
         self.ai_vect = Vector2()
+        self._ai_action = com_type.ControlAction()
 
     def _ai(self) -> None:
         ...
+
+    def move(self) -> None:
+        if self.rect is None:
+            return
+        self.rect = self.rect.move(self._get_vec_with_action(self._ai_action))
+        self.position.x, self.position.y = self.rect.x, self.rect.y
 
     def update(self, *_, **__) -> None:
         if self.rect is None:
             return
         self.rect.x += self.metadata.scroll_index
-        if self.rect.right < -50:
+        if self.rect.right < -50 or self.rect.top > settings.SCREEN_HEIGHT:
             self.kill()
+        self.move()
+        self._get_action_with_control(self._ai_action)
+        self.play()
 
