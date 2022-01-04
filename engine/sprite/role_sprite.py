@@ -121,15 +121,18 @@ class EnemySprite(RoleSprite):
     def move(self) -> None:
         if self.rect is None:
             return
+        self.rect.x += self.metadata.scroll_index
         self.rect = self.rect.move(self._get_vec_with_action(self._ai_action))
         self.position.x, self.position.y = self.rect.x, self.rect.y
 
-    def update(self, *_, **__) -> None:
+    def _out_world_kill(self) -> None:
         if self.rect is None:
             return
-        self.rect.x += self.metadata.scroll_index
         if self.rect.right < -50 or self.rect.top > settings.SCREEN_HEIGHT:
             self.kill()
+
+    def update(self, *_, **__) -> None:
+        self._out_world_kill()
         self.move()
         self._get_action_with_control(self._ai_action)
         self.play()
