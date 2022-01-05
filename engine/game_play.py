@@ -2,7 +2,7 @@ import os
 
 from pygame import surface, event, Vector2, sprite
 
-from .lib import GameManager, com_fuc, KeyMap, GameDataStruct, GameMetaData, com_type
+from .lib import GameManager, com_fuc, KeyMap, GameDataStruct, GameMetaData
 from .sprite import TileSprite, ItemSprite, PlayerSprite, EnemySprite
 from . import settings
 
@@ -18,22 +18,36 @@ class GamePlay(GameManager):
         self._current_level = 0
         self._grenade_number = 3
         self._shoot = False
-        self._world_data_path = os.path.join(settings.WORLD_DATA_PATH, f'{self._current_level}.pk')
-        self._world_data = GameDataStruct.load_world_data(self._world_data_path)
+        self._world_data = GameDataStruct.load_world_data(
+            os.path.join(settings.WORLD_DATA_PATH, f'{self._current_level}.pk')
+        )
         self._player_sprites = sprite.Group()
         self._enemy_sprites = sprite.Group()
-        self._tile_sprite = sprite.Group()
-        self._item_sprite = sprite.Group()
+        self._tile_sprites = sprite.Group()
+        self._item_sprites = sprite.Group()
+        self._bullet_sprites = sprite.Group()
         self._init_content()
 
     def _init_sprite(self,
                      sprite: int,
                      position: Vector2) -> None:
         if sprite in settings.PLAYER_TILES:
-            player_sprite = PlayerSprite(settings.PLAYER1_IMG_PATH_MAP, position, self._tile_sprite, self.metadata)
+            player_sprite = PlayerSprite(
+                settings.PLAYER1_IMG_PATH_MAP,
+                position,
+                self._tile_sprites,
+                self._bullet_sprites,
+                self.metadata
+            )
             self._player_sprites.add(player_sprite)
         elif sprite in settings.ENEMY_TILES:
-            enemy_sprite = EnemySprite(settings.ENEMY1_IMG_PATH_MAP, position, self._tile_sprite, self.metadata)
+            enemy_sprite = EnemySprite(
+                settings.ENEMY1_IMG_PATH_MAP,
+                position,
+                self._tile_sprites,
+                self._bullet_sprites,
+                self.metadata
+            )
             self._enemy_sprites.add(enemy_sprite)
 
     def _init_word_data(self,
@@ -48,12 +62,12 @@ class GamePlay(GameManager):
             )
             if data_type == settings.IMG_TYPE_TILES:
                 img_surface = self._tiles_images[tile_name]
-                self._tile_sprite.add(TileSprite(img_surface, position, self.metadata))
+                self._tile_sprites.add(TileSprite(img_surface, position, self.metadata))
             elif data_type == settings.IMG_TYPE_SPRITES:
                 self._init_sprite(img, position)
             elif data_type == settings.IMG_TYPE_ITEMS:
                 img_surface = self._item_images[tile_name]
-                self._item_sprite.add(ItemSprite(img_surface, position, self.metadata))
+                self._item_sprites.add(ItemSprite(img_surface, position, self.metadata))
 
     def _init_content(self) -> None:
         # init background
@@ -87,46 +101,28 @@ class GamePlay(GameManager):
         elif key_map.key_back_press():
             self.metadata.game_mode = settings.GAME_START
 
-    # def _get_player_vec(self) -> Vector2:
-    #     x = 0
-    #     self._jump_vect_y += int(settings.GRAVITY)
-    #     if self._jump_vect_y >= settings.MAX_GRAVITY:
-    #         self._jump_vect_y = settings.MAX_GRAVITY
-    #     y = self._jump_vect_y
-    #     if self._run_left:
-    #         x += (settings.MOVE_SPEED*-1)
-    #     elif self._run_right:
-    #         x += (settings.MOVE_SPEED)
-    #     return Vector2(x, y)
-
-    # def _get_player_acttion(self) -> str:
-    #     action = 'idle'
-    #     if self._run_left:
-    #         action = 'run_left'
-    #     elif self._run_right:
-    #         action = 'run_right'
-    #     return action
-
     def _update_backgroud_scroll(self) -> None:
         for index, background_vec in enumerate(self._background_lays_pos):
             lay_index = index%len(self._background_lays)
             background_vec.x += self.metadata.scroll_index * ((lay_index+1)/len(self._background_lays))
 
     def update(self, dt: float) -> None:
-        self._tile_sprite.update()
-        self._item_sprite.update()
+        self._tile_sprites.update()
+        self._item_sprites.update()
         self._player_sprites.update(dt=dt)
         self._enemy_sprites.update(dt=dt)
+        self._bullet_sprites.update(dt=dt)
         self._update_backgroud_scroll()
 
     def draw(self, screen: surface.Surface) -> None:
         for index,lay_pos in enumerate(self._background_lays_pos):
             lay = self._background_lays[index%len(self._background_lays)]
             screen.blit(lay, lay_pos)
-        self._tile_sprite.draw(screen)
-        self._item_sprite.draw(screen)
+        self._tile_sprites.draw(screen)
+        self._item_sprites.draw(screen)
         self._player_sprites.draw(screen)
         self._enemy_sprites.draw(screen)
+        self._bullet_sprites.draw(screen)
 
     def clear(self, screen: surface.Surface) -> None:
         screen.fill(settings.RGB_BLACK)

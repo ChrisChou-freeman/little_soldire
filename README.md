@@ -6,4 +6,5 @@
 * (done)play screen
 * (done)animation sprite
 * (done)tile collision detect
-* (doing)shooting bullet
+* (done)shooting bullet
+* (doing)hit detect

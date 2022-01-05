@@ -1,6 +1,7 @@
 from pygame import Vector2, image, sprite, rect
 
 from .animation_sprite import AnimationSprite
+from .bullet_sprite import Bullet
 from ..lib import GameMetaData, com_type
 from .. import settings
 
@@ -9,13 +10,17 @@ class RoleSprite(AnimationSprite):
                  sprite_sheet_info: dict[str, dict[str, str]],
                  position: Vector2,
                  tile_sprites: sprite.Group,
+                 bullet_sprites: sprite.Group,
                  metadata: GameMetaData) -> None:
         self._sprite_sheet_info = sprite_sheet_info
         self._action = 'idle'
         self._jump_vect_y = 0
+        self._attack_frequency = int(settings.FPS/3)
+        self._attack_counter = 0
         self.falling = False
         self.position = position
         self.tile_sprites = tile_sprites
+        self.bullet_sprites = bullet_sprites
         self.metadata = metadata
         self._set_current_action()
 
@@ -47,16 +52,40 @@ class RoleSprite(AnimationSprite):
             self.falling = False
         return c_d_vect
 
+    def _shoot_bullet(self) -> None:
+        if self.rect is None:
+            return
+        bullet_img = image.load(settings.BULLET_IMG_PATH)
+        pos_x = self.rect.left if self.flip else self.rect.right
+        pos_y = self.rect.bottom - int(self.rect.height / 2) - 5
+        vect_x = -1 if self.flip else 1
+        vect_y = 0
+        bullet_speed = 500
+        bs = Bullet(
+            bullet_img,
+            Vector2(pos_x, pos_y),
+            Vector2(vect_x, vect_y),
+            bullet_speed,
+            self.tile_sprites
+        )
+        self.bullet_sprites.add(bs)
+
     def _get_action_with_control(self, control_action: com_type.ControlAction) -> None:
         action = 'idle'
         if control_action.RUN_LEFT:
             self.flip = True
             action = 'run'
-        elif control_action.RUN_RIGHT:
+        if control_action.RUN_RIGHT:
             self.flip = False
             action = 'run'
-        elif control_action.JUMPING or self.falling:
+        if control_action.JUMPING or self.falling:
             action = 'jump'
+        if control_action.SHOOT:
+            if self._attack_counter == 0 or self._attack_counter%self._attack_frequency == 0:
+                self._shoot_bullet()
+            self._attack_counter += 1
+        else:
+            self._attack_counter = 0
         if action != self._action:
             self._action = action
             self._set_current_action(self.flip)
@@ -86,18 +115,24 @@ class PlayerSprite(RoleSprite):
                  sprite_sheet_info: dict[str, dict[str, str]],
                  position: Vector2,
                  tile_sprites: sprite.Group,
+                 bullet_sprites: sprite.Group,
                  metadata: GameMetaData) -> None:
-        super().__init__(sprite_sheet_info, position, tile_sprites, metadata)
+        super().__init__(sprite_sheet_info, position, tile_sprites, bullet_sprites,metadata)
+        self._health_value = 100
 
     def move(self) -> None:
         if self.rect is None:
             return
+        if self.rect.x <= 0 and self.metadata.control_action.RUN_LEFT:
+            return
         self.rect = self.rect.move(self._get_vec_with_action(self.metadata.control_action))
         self.position.x, self.position.y = self.rect.x, self.rect.y
-        if self.rect.centerx < settings.SCREEN_WIDTH//2:
+        # scroll screen
+        if self.rect.x < settings.SCREEN_WIDTH//2:
+            self.metadata.scroll_index = 0
             return
-        forward_distance = settings.SCREEN_WIDTH//2 - self.rect.centerx
-        self.rect.centerx = settings.SCREEN_WIDTH//2
+        forward_distance = settings.SCREEN_WIDTH//2 - self.rect.x
+        self.rect.x = settings.SCREEN_WIDTH//2
         self.metadata.scroll_index = forward_distance
 
     def update(self, *_, **__) -> None:
@@ -110,8 +145,10 @@ class EnemySprite(RoleSprite):
                  sprite_sheet_info: dict[str, dict[str, str]],
                  position: Vector2,
                  tile_sprites: sprite.Group,
+                 bullet_sprites: sprite.Group,
                  metadata: GameMetaData) -> None:
-        super().__init__(sprite_sheet_info, position, tile_sprites, metadata)
+        super().__init__(sprite_sheet_info, position, tile_sprites, bullet_sprites, metadata)
+        self._health_value = 100
         self.ai_vect = Vector2()
         self._ai_action = com_type.ControlAction()
 
@@ -125,6 +162,15 @@ class EnemySprite(RoleSprite):
         self.rect = self.rect.move(self._get_vec_with_action(self._ai_action))
         self.position.x, self.position.y = self.rect.x, self.rect.y
 
+    def _hit_detect(self) -> None:
+        if self.rect is None:
+            return
+        for sprite in self.bullet_sprites:
+            if sprite.rect is None:
+                continue
+            if sprite.rect.colliderect(self.rect):
+                sprite.kill()
+
     def _out_world_kill(self) -> None:
         if self.rect is None:
             return
@@ -135,5 +181,6 @@ class EnemySprite(RoleSprite):
         self._out_world_kill()
         self.move()
         self._get_action_with_control(self._ai_action)
+        self._hit_detect()
         self.play()
 

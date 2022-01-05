@@ -19,8 +19,7 @@ class AnimationSprite(sprite.Sprite):
         self.rotate_value = 0.0
         self.flip = flip
         self.image = self._get_curren_fram()
-        self.rect = self.image.get_rect()
-        self.rect = self.rect.move(position)
+        self.rect = self.image.get_rect().move(position)
 
     def _get_curren_fram_area(self) -> rect.Rect:
         return rect.Rect(

@@ -10,8 +10,7 @@ class CloudSprite(sprite.Sprite):
                  speed_time: int) -> None:
         super().__init__()
         self.image = image
-        self.rect = image.get_rect()
-        self.rect.left, self.rect.top = int(position.x), int(position.y)
+        self.rect = image.get_rect().move(position)
         self.speed_time = speed_time
         self.couter = 0
 
