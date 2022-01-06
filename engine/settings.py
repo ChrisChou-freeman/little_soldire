@@ -17,6 +17,10 @@ GRAVITY = MOVE_SPEED * 0.7
 MAX_GRAVITY = 6
 JUMP_FORCE = -17
 
+# game rules
+PLAYER_DAMEGE = 20
+ENEMY_DAMEGE = 5
+
 # game asset something
 TILE_SIZE = (32, 32)
 GAME_START_IMG_PATH = os.path.join(PRO_PATH, 'content/image/game_start')

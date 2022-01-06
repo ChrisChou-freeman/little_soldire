@@ -9,13 +9,15 @@ class Bullet(sprite.Sprite):
         position: Vector2,
         vect: Vector2,
         speed: int,
-        tile_sprites: sprite.Group) -> None:
+        tile_sprites: sprite.Group,
+        bullet_type: str) -> None:
         super().__init__()
         self.image = image
         self.rect = image.get_rect().move(position)
         self.speed = speed
         self.vect = vect
         self.tile_sprites = tile_sprites
+        self.bullet_type = bullet_type
         self.couter = 0
         self.life_time = settings.FPS * 2
 

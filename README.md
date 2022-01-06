@@ -7,4 +7,5 @@
 * (done)animation sprite
 * (done)tile collision detect
 * (done)shooting bullet
-* (doing)hit detect
+* (done)hit detect
+* (doing)enemy simple AI
