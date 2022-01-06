@@ -8,18 +8,7 @@ class AnimationSprite(sprite.Sprite):
                  loop: bool=True,
                  flip:bool=False) -> None:
         super().__init__()
-        self._current_fram = 0
-        self._loop = loop
-        self._counter = 0
-        self._frequency = 6
-        self._playing = False
-        self._image_sheet = image_sheet
-        self._fram_with = fram_with
-        self._fram_number = self._image_sheet.get_width() / fram_with
-        self.rotate_value = 0.0
-        self.flip = flip
-        self.image = self._get_curren_fram()
-        self.rect = self.image.get_rect().move(position)
+        self.init_animation(image_sheet, position, fram_with, loop, flip)
 
     def init_animation(self,
                  image_sheet: surface.Surface,

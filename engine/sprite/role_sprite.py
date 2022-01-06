@@ -179,6 +179,8 @@ class EnemySprite(RoleSprite):
         if self.rect is None:
             return
         for sprite in self.bullet_sprites:
+            if self.health_value <= 0:
+                return
             if sprite.rect is None:
                 continue
             if sprite.rect.colliderect(self.rect):
