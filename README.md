@@ -8,4 +8,6 @@
 * (done)tile collision detect
 * (done)shooting bullet
 * (done)hit detect
-* (doing)enemy simple AI
+* (done)enemy simple AI
+* (doing)better jumping action
+* (doing)simple hud

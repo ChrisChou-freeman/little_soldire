@@ -2,6 +2,8 @@ import os
 import pickle
 from dataclasses import dataclass
 
+from pygame import surface
+
 from .. import settings
 from .common_type import ControlAction
 
@@ -11,6 +13,7 @@ class GameMetaData:
     level_edit_tile: str
     scroll_index: int
     control_action: ControlAction
+    scrren: surface.Surface
 
 @dataclass
 class GameDataStruct:

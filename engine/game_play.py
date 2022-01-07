@@ -26,6 +26,7 @@ class GamePlay(GameManager):
         self._tile_sprites = sprite.Group()
         self._item_sprites = sprite.Group()
         self._bullet_sprites = sprite.Group()
+        self._debug_sprites = sprite.Group()
         self._init_content()
 
     def _init_sprite(self,
@@ -46,6 +47,7 @@ class GamePlay(GameManager):
                 position,
                 self._tile_sprites,
                 self._bullet_sprites,
+                self._player_sprites,
                 self.metadata
             )
             self._enemy_sprites.add(enemy_sprite)

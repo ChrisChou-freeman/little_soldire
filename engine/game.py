@@ -12,7 +12,7 @@ class MainGame:
         pygame.init()
         self._screen = self._create_screen()
         self._clock = pygame.time.Clock()
-        self._game_metadata = GameMetaData(settings.GAME_START, '', 0, com_type.ControlAction())
+        self._game_metadata = GameMetaData(settings.GAME_START, '', 0, com_type.ControlAction(), self._screen)
         self._game_mode: dict[str, type[GameManager]] = {
             settings.GAME_START: game_start.GameStart,
             settings.GAME_EDITOR: game_editor.GameEditor,

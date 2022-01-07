@@ -19,7 +19,7 @@ class Bullet(sprite.Sprite):
         self.tile_sprites = tile_sprites
         self.bullet_type = bullet_type
         self.couter = 0
-        self.life_time = settings.FPS * 2
+        self.life_time = settings.BULLET_LIFE_TIME
 
     def _bullet_move(self, dt: float) -> None:
         if self.rect is None:
