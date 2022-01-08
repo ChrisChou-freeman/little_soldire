@@ -12,4 +12,5 @@
 * (done)better jumping action
 * (done)enemy detect notice symbol 
 * (doing)simple playing hud
+* (doing)throw grenade & explode shake
 * (doing)sound effect
