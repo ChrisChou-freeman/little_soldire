@@ -9,5 +9,7 @@
 * (done)shooting bullet
 * (done)hit detect
 * (done)enemy simple AI
-* (doing)better jumping action
-* (doing)simple hud
+* (done)better jumping action
+* (done)enemy detect notice symbol 
+* (doing)simple playing hud
+* (doing)sound effect

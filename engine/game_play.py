@@ -1,24 +1,25 @@
 import os
 
+import pygame
 from pygame import surface, event, Vector2, sprite
 
-from .lib import GameManager, com_fuc, KeyMap, GameDataStruct, GameMetaData
-from .sprite import TileSprite, ItemSprite, PlayerSprite, EnemySprite
+from . import lib
+from . import sprite as _sprite
 from . import settings
 
-class GamePlay(GameManager):
-    def __init__(self, metadata: GameMetaData) -> None:
+class GamePlay(lib.GameManager):
+    def __init__(self, metadata: lib.GameMetaData) -> None:
         super().__init__(metadata)
-        self._background_lays = com_fuc.pygame_load_images_list(settings.GAME_PLAY_BACK_IMG_PATH)
+        self._background_lays = lib.com_fuc.pygame_load_images_list(settings.GAME_PLAY_BACK_IMG_PATH)
         self._background_lays_pos: list[Vector2] = []
-        self._tiles_images = com_fuc.pygame_load_iamges_with_name(settings.TILES_IMG_PATH)
-        self._item_images = com_fuc.pygame_load_iamges_with_name(settings.ITEMS_IMG_PATH)
-        self._sprite_images = com_fuc.pygame_load_iamges_with_name(settings.SPRITE_IMG_PATH)
+        self._tiles_images = lib.com_fuc.pygame_load_iamges_with_name(settings.TILES_IMG_PATH)
+        self._item_images = lib.com_fuc.pygame_load_iamges_with_name(settings.ITEMS_IMG_PATH)
+        self._sprite_images = lib.com_fuc.pygame_load_iamges_with_name(settings.SPRITE_IMG_PATH)
         self._layers_repets = 2
         self._current_level = 0
         self._grenade_number = 3
         self._shoot = False
-        self._world_data = GameDataStruct.load_world_data(
+        self._world_data = lib.GameDataStruct.load_world_data(
             os.path.join(settings.WORLD_DATA_PATH, f'{self._current_level}.pk')
         )
         self._player_sprites = sprite.Group()
@@ -33,7 +34,7 @@ class GamePlay(GameManager):
                      sprite: int,
                      position: Vector2) -> None:
         if sprite in settings.PLAYER_TILES:
-            player_sprite = PlayerSprite(
+            player_sprite = _sprite.PlayerSprite(
                 settings.PLAYER1_IMG_PATH_MAP,
                 position,
                 self._tile_sprites,
@@ -42,7 +43,7 @@ class GamePlay(GameManager):
             )
             self._player_sprites.add(player_sprite)
         elif sprite in settings.ENEMY_TILES:
-            enemy_sprite = EnemySprite(
+            enemy_sprite = _sprite.EnemySprite(
                 settings.ENEMY1_IMG_PATH_MAP,
                 position,
                 self._tile_sprites,
@@ -64,12 +65,12 @@ class GamePlay(GameManager):
             )
             if data_type == settings.IMG_TYPE_TILES:
                 img_surface = self._tiles_images[tile_name]
-                self._tile_sprites.add(TileSprite(img_surface, position, self.metadata))
+                self._tile_sprites.add(_sprite.TileSprite(img_surface, position, self.metadata))
             elif data_type == settings.IMG_TYPE_SPRITES:
                 self._init_sprite(img, position)
             elif data_type == settings.IMG_TYPE_ITEMS:
                 img_surface = self._item_images[tile_name]
-                self._item_sprites.add(ItemSprite(img_surface, position, self.metadata))
+                self._item_sprites.add(_sprite.ItemSprite(img_surface, position, self.metadata))
 
     def _init_content(self) -> None:
         # init background
@@ -83,7 +84,7 @@ class GamePlay(GameManager):
         self._init_word_data(settings.IMG_TYPE_SPRITES, self._world_data.sprites_data)
 
     def handle_input(self, key_event: event.Event) -> None:
-        key_map = KeyMap(key_event)
+        key_map = lib.KeyMap(key_event)
         if key_map.key_left_press():
             self.metadata.control_action.RUN_LEFT = True
         elif key_map.key_left_release():
@@ -116,6 +117,13 @@ class GamePlay(GameManager):
         self._bullet_sprites.update(dt=dt)
         self._update_backgroud_scroll()
 
+    def death_shady(self, screen: surface.Surface) -> None:
+        if not self.metadata.GAME_OVER:
+            return
+        sur = surface.Surface((settings.SCREEN_WIDTH, settings.SCREEN_HEIGHT), pygame.SRCALPHA)
+        sur.fill(settings.RGBA_BLACK)
+        screen.blit(sur, (0, 0))
+
     def draw(self, screen: surface.Surface) -> None:
         for index,lay_pos in enumerate(self._background_lays_pos):
             lay = self._background_lays[index%len(self._background_lays)]
@@ -125,6 +133,7 @@ class GamePlay(GameManager):
         self._player_sprites.draw(screen)
         self._enemy_sprites.draw(screen)
         self._bullet_sprites.draw(screen)
+        self.death_shady(screen)
 
     def clear(self, screen: surface.Surface) -> None:
         screen.fill(settings.RGB_BLACK)

@@ -14,6 +14,7 @@ class GameMetaData:
     scroll_index: int
     control_action: ControlAction
     scrren: surface.Surface
+    GAME_OVER: bool = False
 
 @dataclass
 class GameDataStruct:

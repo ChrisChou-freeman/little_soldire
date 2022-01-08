@@ -1,12 +1,12 @@
 from pygame import sprite, Vector2, surface
 
-from ..lib import GameMetaData
+from .. import lib
 
 class ItemSprite(sprite.Sprite):
     def __init__(self,
                  image: surface.Surface,
                  position: Vector2,
-                 metadata: GameMetaData) -> None:
+                 metadata: lib.GameMetaData) -> None:
         super().__init__()
         self.image = image
         self.rect = image.get_rect()
