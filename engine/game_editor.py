@@ -232,7 +232,8 @@ class GameEditor(GameManager):
         tip_obj = Tip(f'current level:{self._current_level}', position, 25)
         tip_obj.draw(screen)
 
-    def draw(self, screen: surface.Surface) -> None:
+    def draw(self) -> None:
+        screen = self.metadata.scrren
         for index,lay_pos in enumerate(self._background_lays_pos):
             lay = self._background_lays[index%len(self._background_lays)]
             screen.blit(lay, lay_pos)

@@ -3,10 +3,13 @@ from pygame import Vector2, font, surface
 from .. import settings
 
 class Menu:
-    def __init__(self, menu_content: str, position: Vector2, size: int) -> None:
+    def __init__(self, menu_content: str, position: Vector2, size: int, center:bool = False) -> None:
         self.font = font.Font(None, size)
         self.menu_content = menu_content
         self.font_rend = self.font.render(self.menu_content, False, settings.RGB_WHITE)
+        if center:
+            position.x -= self.font.size(menu_content)[0]//2
+            position.y -= self.font.size(menu_content)[1]//2
         self.position = position
         self.be_select = False
 

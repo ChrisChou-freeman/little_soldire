@@ -78,7 +78,8 @@ class GameStart(GameManager):
         for menu in self._menus:
             menu.update()
 
-    def draw(self, screen: surface.Surface) -> None:
+    def draw(self) -> None:
+        screen = self.metadata.scrren
         for index, lay in enumerate(self._background_lays):
             screen.blit(lay, self._background_lays_pos[index])
         self.cloud_sprites.draw(screen)

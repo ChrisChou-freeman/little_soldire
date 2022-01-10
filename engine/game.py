@@ -40,7 +40,7 @@ class MainGame:
 
     def _draw(self) -> None:
         if self._game_manager is not None:
-            self._game_manager.draw(self._screen)
+            self._game_manager.draw()
         self._draw_fps()
 
     def _update(self, dt: float) -> None:

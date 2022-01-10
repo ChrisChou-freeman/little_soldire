@@ -6,19 +6,31 @@ from pygame import surface, event, Vector2, sprite
 from . import lib
 from . import sprite as _sprite
 from . import settings
+from . import ui
+
+CONTINUE_MENU_LIST = [
+    'Restart',
+    'Exit'
+]
 
 class GamePlay(lib.GameManager):
     def __init__(self, metadata: lib.GameMetaData) -> None:
         super().__init__(metadata)
         self._background_lays = lib.com_fuc.pygame_load_images_list(settings.GAME_PLAY_BACK_IMG_PATH)
-        self._background_lays_pos: list[Vector2] = []
         self._tiles_images = lib.com_fuc.pygame_load_iamges_with_name(settings.TILES_IMG_PATH)
         self._item_images = lib.com_fuc.pygame_load_iamges_with_name(settings.ITEMS_IMG_PATH)
         self._sprite_images = lib.com_fuc.pygame_load_iamges_with_name(settings.SPRITE_IMG_PATH)
+        self._init()
+
+    def _init(self) -> None:
+        self.metadata.control_action = lib.com_type.ControlAction()
+        self.metadata.GAME_OVER = False
+        self._background_lays_pos: list[Vector2] = []
         self._layers_repets = 2
         self._current_level = 0
         self._grenade_number = 3
         self._shoot = False
+        self._game_pause = False
         self._world_data = lib.GameDataStruct.load_world_data(
             os.path.join(settings.WORLD_DATA_PATH, f'{self._current_level}.pk')
         )
@@ -28,7 +40,25 @@ class GamePlay(lib.GameManager):
         self._item_sprites = sprite.Group()
         self._bullet_sprites = sprite.Group()
         self._debug_sprites = sprite.Group()
+        self._continue_menu_list: list[ui.Menu] = []
+        self._selected_continue_menu = 0
         self._init_content()
+
+    def _init_continue_menus(self) -> None:
+        menu_size = 35
+        menu_gap = 30
+        for index, m in enumerate(CONTINUE_MENU_LIST):
+            menu = ui.Menu(
+                m,
+                Vector2(
+                    settings.SCREEN_WIDTH//2,
+                    settings.SCREEN_HEIGHT//2 + menu_gap * index
+                ),
+                menu_size,
+                True
+            )
+            self._continue_menu_list.append(menu)
+
 
     def _init_sprite(self,
                      sprite: int,
@@ -82,9 +112,10 @@ class GamePlay(lib.GameManager):
         self._init_word_data(settings.IMG_TYPE_ITEMS, self._world_data.items_data)
         self._init_word_data(settings.IMG_TYPE_TILES, self._world_data.tiles_data)
         self._init_word_data(settings.IMG_TYPE_SPRITES, self._world_data.sprites_data)
+        # init continue menu
+        self._init_continue_menus()
 
-    def handle_input(self, key_event: event.Event) -> None:
-        key_map = lib.KeyMap(key_event)
+    def handle_input_player(self, key_map: lib.KeyMap) -> None:
         if key_map.key_left_press():
             self.metadata.control_action.RUN_LEFT = True
         elif key_map.key_left_release():
@@ -102,7 +133,36 @@ class GamePlay(lib.GameManager):
         elif key_map.key_attack_release():
             self.metadata.control_action.SHOOT = False
         elif key_map.key_back_press():
-            self.metadata.game_mode = settings.GAME_START
+            self._game_pause = True
+
+    def handle_input_continue(self, key_map: lib.KeyMap) -> None:
+        for index, menu in enumerate(self._continue_menu_list):
+            if index == self._selected_continue_menu:
+                menu.be_select = True
+            else:
+                menu.be_select = False
+        if key_map.key_enter_press():
+            if CONTINUE_MENU_LIST[self._selected_continue_menu] == 'Restart':
+                self._init()
+            elif CONTINUE_MENU_LIST[self._selected_continue_menu] == 'Exit':
+                self.metadata.game_mode = settings.GAME_START
+        elif key_map.key_up_press():
+            self._selected_continue_menu -= 1
+            if self._selected_continue_menu < 0:
+                self._selected_continue_menu = 0
+        elif key_map.key_down_press():
+            self._selected_continue_menu += 1
+            if self._selected_continue_menu > len(self._continue_menu_list)-1:
+                self._selected_continue_menu = len(self._continue_menu_list)-1
+        elif key_map.key_back_press():
+            self._game_pause = False
+
+    def handle_input(self, key_event: event.Event) -> None:
+        key_map = lib.KeyMap(key_event)
+        if self.metadata.GAME_OVER or self._game_pause:
+            self.handle_input_continue(key_map)
+        else:
+            self.handle_input_player(key_map)
 
     def _update_backgroud_scroll(self) -> None:
         for index, background_vec in enumerate(self._background_lays_pos):
@@ -110,6 +170,10 @@ class GamePlay(lib.GameManager):
             background_vec.x += self.metadata.scroll_index * ((lay_index+1)/len(self._background_lays))
 
     def update(self, dt: float) -> None:
+        for menu in self._continue_menu_list:
+            menu.update()
+        if self._game_pause:
+            return
         self._tile_sprites.update()
         self._item_sprites.update()
         self._player_sprites.update(dt=dt)
@@ -117,14 +181,19 @@ class GamePlay(lib.GameManager):
         self._bullet_sprites.update(dt=dt)
         self._update_backgroud_scroll()
 
-    def death_shady(self, screen: surface.Surface) -> None:
-        if not self.metadata.GAME_OVER:
-            return
-        sur = surface.Surface((settings.SCREEN_WIDTH, settings.SCREEN_HEIGHT), pygame.SRCALPHA)
-        sur.fill(settings.RGBA_BLACK)
-        screen.blit(sur, (0, 0))
+    def _continue_menu(self, screen: surface.Surface) -> None:
+        for menu in self._continue_menu_list:
+            menu.draw(screen)
 
-    def draw(self, screen: surface.Surface) -> None:
+    def _draw_death_fade(self, screen: surface.Surface) -> None:
+        if self.metadata.GAME_OVER or self._game_pause:
+            sur = surface.Surface((settings.SCREEN_WIDTH, settings.SCREEN_HEIGHT), pygame.SRCALPHA)
+            sur.fill(settings.RGBA_BLACK)
+            screen.blit(sur, (0, 0))
+            self._continue_menu(screen)
+
+    def draw(self) -> None:
+        screen = self.metadata.scrren
         for index,lay_pos in enumerate(self._background_lays_pos):
             lay = self._background_lays[index%len(self._background_lays)]
             screen.blit(lay, lay_pos)
@@ -133,7 +202,7 @@ class GamePlay(lib.GameManager):
         self._player_sprites.draw(screen)
         self._enemy_sprites.draw(screen)
         self._bullet_sprites.draw(screen)
-        self.death_shady(screen)
+        self._draw_death_fade(screen)
 
     def clear(self, screen: surface.Surface) -> None:
         screen.fill(settings.RGB_BLACK)

@@ -17,7 +17,7 @@ class GameManager(ABC):
         ...
 
     @abstractmethod
-    def draw(self, screen: surface.Surface) -> None:
+    def draw(self) -> None:
         ...
 
     @abstractmethod
