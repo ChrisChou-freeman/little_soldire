@@ -104,14 +104,23 @@ class RoleSprite(AnimationSprite):
         pos_y = self.rect.bottom - int(self.rect.height / 2) - 5
         vect_x = -1 if self.flip else 1
         vect_y = 0
-        bullet_speed = 500
+        # bullet_speed = 0
+        regular_bullet_speed = 500
+        speed_time = 0.0
+        if role == 'player':
+            # bullet_speed = 500
+            speed_time = 1.0
+        else:
+            speed_time = 0.5
         bs = Bullet(
+            self.metadata,
             bullet_img,
             Vector2(pos_x, pos_y),
             Vector2(vect_x, vect_y),
-            bullet_speed,
+            int(regular_bullet_speed*speed_time),
             self.tile_sprites,
-            role
+            role,
+            int(settings.BULLET_LIFE_TIME * (1/speed_time))
         )
         self.bullet_sprites.add(bs)
 

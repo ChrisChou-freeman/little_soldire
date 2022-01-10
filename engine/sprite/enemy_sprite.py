@@ -15,6 +15,9 @@ class EnemySprite(role_sprite.RoleSprite):
                  player_sprite: sprite.Group,
                  metadata: GameMetaData) -> None:
         super().__init__(sprite_sheet_info, position, tile_sprites, bullet_sprites, metadata)
+        self._notice_symbol = image.load(settings.NOTICE_IMG_PATH)
+        self._player_sprite = player_sprite
+        self._ai_action = com_type.ControlAction()
         self._ai_wake_time = settings.FPS * random.choice(range(0, 2))
         self._vision_rect = rect.Rect(position.x - 30, position.y, 300, 40)
         self._ai_counter = 0
@@ -23,10 +26,8 @@ class EnemySprite(role_sprite.RoleSprite):
         self._wander_vectx = 0
         self._idling_time = settings.FPS * 3
         self.lose_detect = 0
+        self.detect_time = settings.FPS // 2
         self.attack_frequency = int(settings.FPS*2)
-        self._player_sprite = player_sprite
-        self._ai_action = com_type.ControlAction()
-        self._notice_symbol = image.load(settings.NOTICE_IMG_PATH)
         self._be_hiting = int(settings.FPS * 0.5)
 
     def vision_col_detect(self) -> bool:

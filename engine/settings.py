@@ -20,7 +20,7 @@ JUMP_FORCE = -11
 
 # game rules
 PLAYER_DAMEGE = 20
-ENEMY_DAMEGE = 100
+ENEMY_DAMEGE = 10
 BULLET_LIFE_TIME = FPS * 1
 
 # game asset something
