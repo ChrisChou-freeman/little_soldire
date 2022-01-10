@@ -28,7 +28,7 @@ class Bullet(sprite.Sprite):
     def _bullet_move(self, dt: float) -> None:
         if self.rect is None:
             return
-        self.rect.x += self.metadata.scroll_index
+        self.rect.x += self.metadata.scroll_value
         move_x = dt * self.speed * self.vect.x
         self.rect.x += round(move_x)
 

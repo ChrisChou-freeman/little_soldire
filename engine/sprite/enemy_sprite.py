@@ -18,7 +18,7 @@ class EnemySprite(role_sprite.RoleSprite):
         self._notice_symbol = image.load(settings.NOTICE_IMG_PATH)
         self._player_sprite = player_sprite
         self._ai_action = com_type.ControlAction()
-        self._ai_wake_time = settings.FPS * random.choice(range(0, 2))
+        self._ai_wake_time = settings.FPS * random.choice(range(0, 3)) / 2
         self._vision_rect = rect.Rect(position.x - 30, position.y, 300, 40)
         self._ai_counter = 0
         self.health_value = 40
@@ -80,7 +80,7 @@ class EnemySprite(role_sprite.RoleSprite):
     def move(self) -> None:
         if self.rect is None:
             return
-        self.rect.x += self.metadata.scroll_index
+        self.rect.x += self.metadata.scroll_value
         move_rect = self._get_vec_with_action(self._ai_action)
         self._wander_vectx += int(move_rect.x)
         self.rect = self.rect.move(move_rect)

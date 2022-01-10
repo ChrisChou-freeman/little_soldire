@@ -23,11 +23,11 @@ class PlayerSprite(role_sprite.RoleSprite):
         self.position.x, self.position.y = self.rect.x, self.rect.y
         # scroll screen
         if self.rect.x < settings.SCREEN_WIDTH//2:
-            self.metadata.scroll_index = 0
+            self.metadata.scroll_value = 0
             return
         forward_distance = settings.SCREEN_WIDTH//2 - self.rect.x
         self.rect.x = settings.SCREEN_WIDTH//2
-        self.metadata.scroll_index = forward_distance
+        self.metadata.scroll_value = forward_distance
 
     def hub(self) -> None:
         x = 10
@@ -37,6 +37,12 @@ class PlayerSprite(role_sprite.RoleSprite):
         pygame.draw.rect(screen, settings.RGB_RED, (x, y, 150, 20))
         pygame.draw.rect(screen, settings.RGB_YELLOW, (x, y, int(150 * ratio), 20))
 
+    def _fall_off_screen_derect(self) -> None:
+        if self.rect is None:
+            return
+        if self.rect.top >= settings.SCREEN_HEIGHT:
+            self.health_value = 0
+
     def update(self, *_, **__) -> None:
         if self.is_empty_health():
             self.metadata.GAME_OVER = True
@@ -45,4 +51,5 @@ class PlayerSprite(role_sprite.RoleSprite):
         self.play()
         self.hit_detect('player')
         self.hub()
+        self._fall_off_screen_derect()
 

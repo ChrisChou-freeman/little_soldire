@@ -137,10 +137,7 @@ class GamePlay(lib.GameManager):
 
     def handle_input_continue(self, key_map: lib.KeyMap) -> None:
         for index, menu in enumerate(self._continue_menu_list):
-            if index == self._selected_continue_menu:
-                menu.be_select = True
-            else:
-                menu.be_select = False
+            menu.be_select = True if index == self._selected_continue_menu else False
         if key_map.key_enter_press():
             if CONTINUE_MENU_LIST[self._selected_continue_menu] == 'Restart':
                 self._init()
@@ -167,7 +164,7 @@ class GamePlay(lib.GameManager):
     def _update_backgroud_scroll(self) -> None:
         for index, background_vec in enumerate(self._background_lays_pos):
             lay_index = index%len(self._background_lays)
-            background_vec.x += self.metadata.scroll_index * ((lay_index+1)/len(self._background_lays))
+            background_vec.x += self.metadata.scroll_value * ((lay_index+1)/len(self._background_lays))
 
     def update(self, dt: float) -> None:
         for menu in self._continue_menu_list:

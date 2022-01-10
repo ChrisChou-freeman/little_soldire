@@ -16,6 +16,6 @@ class ItemSprite(sprite.Sprite):
     def update(self, *_, **__) -> None:
         if self.rect is None:
             return
-        self.rect.x += self.metadata.scroll_index
+        self.rect.x += self.metadata.scroll_value
         if self.rect.right < 0:
             self.kill()

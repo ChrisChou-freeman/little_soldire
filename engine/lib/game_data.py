@@ -11,7 +11,7 @@ from .common_type import ControlAction
 class GameMetaData:
     game_mode: str
     level_edit_tile: str
-    scroll_index: int
+    scroll_value: int
     control_action: ControlAction
     scrren: surface.Surface
     GAME_OVER: bool = False
