@@ -24,5 +24,5 @@ class Grenade(sprite.Sprite):
             return
         self.rect.x += self.metadata.scroll_value
 
-    def update(self, *_, **__) -> None:
+    def update(self, **_) -> None:
         self._grenade_parabola()

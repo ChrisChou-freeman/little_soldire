@@ -1,5 +1,4 @@
 import os
-from enum import Enum, auto
 
 from pygame import image, surface
 

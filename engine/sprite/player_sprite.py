@@ -1,5 +1,5 @@
 import pygame
-from pygame import Vector2, sprite, draw
+from pygame import Vector2, sprite
 
 from . import role_sprite
 from ..lib import GameMetaData
@@ -43,7 +43,7 @@ class PlayerSprite(role_sprite.RoleSprite):
         if self.rect.top >= settings.SCREEN_HEIGHT:
             self.health_value = 0
 
-    def update(self, *_, **__) -> None:
+    def update(self, **_) -> None:
         if self.is_empty_health():
             self.metadata.GAME_OVER = True
         self.move()

@@ -117,7 +117,7 @@ class EnemySprite(role_sprite.RoleSprite):
         if self.rect.right < -50 or self.rect.top > settings.SCREEN_HEIGHT:
             self.kill()
 
-    def update(self, *_, **__) -> None:
+    def update(self, **_) -> None:
         self._ai()
         self._out_world_kill()
         self.move()

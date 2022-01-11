@@ -13,7 +13,7 @@ class ItemSprite(sprite.Sprite):
         self.rect = self.rect.move(position)
         self.metadata = metadata
 
-    def update(self, *_, **__) -> None:
+    def update(self, **_) -> None:
         if self.rect is None:
             return
         self.rect.x += self.metadata.scroll_value
