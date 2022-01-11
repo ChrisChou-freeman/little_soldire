@@ -11,8 +11,10 @@ class PlayerSprite(role_sprite.RoleSprite):
                  position: Vector2,
                  tile_sprites: sprite.Group,
                  bullet_sprites: sprite.Group,
+                 grenade_sprites: sprite.Group,
+                 explode_sprites: sprite.Group,
                  metadata: GameMetaData) -> None:
-        super().__init__(sprite_sheet_info, position, tile_sprites, bullet_sprites,metadata)
+        super().__init__(sprite_sheet_info, position, tile_sprites, bullet_sprites, grenade_sprites, explode_sprites, metadata)
 
     def move(self) -> None:
         if self.rect is None:

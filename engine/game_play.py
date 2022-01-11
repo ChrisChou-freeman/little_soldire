@@ -40,6 +40,8 @@ class GamePlay(lib.GameManager):
         self._item_sprites = sprite.Group()
         self._bullet_sprites = sprite.Group()
         self._debug_sprites = sprite.Group()
+        self._grenade_sprites = sprite.Group()
+        self._explode_sprites = sprite.Group()
         self._continue_menu_list: list[ui.Menu] = []
         self._selected_continue_menu = 0
         self._init_content()
@@ -69,6 +71,8 @@ class GamePlay(lib.GameManager):
                 position,
                 self._tile_sprites,
                 self._bullet_sprites,
+                self._grenade_sprites,
+                self._explode_sprites,
                 self.metadata
             )
             self._player_sprites.add(player_sprite)
@@ -79,6 +83,8 @@ class GamePlay(lib.GameManager):
                 self._tile_sprites,
                 self._bullet_sprites,
                 self._player_sprites,
+                self._grenade_sprites,
+                self._explode_sprites,
                 self.metadata
             )
             self._enemy_sprites.add(enemy_sprite)
@@ -125,7 +131,7 @@ class GamePlay(lib.GameManager):
         elif key_map.key_right_release():
             self.metadata.control_action.RUN_RIGHT = False
         elif key_map.key_q_press():
-            pass
+            self.metadata.control_action.THROW_GRENADE = True
         elif key_map.key_jump_press():
             self.metadata.control_action.JUMPING = True
         elif key_map.key_attack_press():
@@ -136,8 +142,7 @@ class GamePlay(lib.GameManager):
             self._game_pause = True
 
     def handle_input_continue(self, key_map: lib.KeyMap) -> None:
-        for index, menu in enumerate(self._continue_menu_list):
-            menu.be_select = True if index == self._selected_continue_menu else False
+        # for index, menu in enumerate(self._continue_menu_list):
         if key_map.key_enter_press():
             if CONTINUE_MENU_LIST[self._selected_continue_menu] == 'Restart':
                 self._init()
@@ -167,7 +172,8 @@ class GamePlay(lib.GameManager):
             background_vec.x += self.metadata.scroll_value * ((lay_index+1)/len(self._background_lays))
 
     def update(self, dt: float) -> None:
-        for menu in self._continue_menu_list:
+        for index, menu in enumerate(self._continue_menu_list):
+            menu.be_select = True if index == self._selected_continue_menu else False
             menu.update()
         if self._game_pause:
             return
@@ -176,6 +182,7 @@ class GamePlay(lib.GameManager):
         self._player_sprites.update(dt=dt)
         self._enemy_sprites.update(dt=dt)
         self._bullet_sprites.update(dt=dt)
+        self._grenade_sprites.update(dt=dt)
         self._update_backgroud_scroll()
 
     def _continue_menu(self, screen: surface.Surface) -> None:
@@ -199,6 +206,7 @@ class GamePlay(lib.GameManager):
         self._player_sprites.draw(screen)
         self._enemy_sprites.draw(screen)
         self._bullet_sprites.draw(screen)
+        self._grenade_sprites.draw(screen)
         self._draw_death_fade(screen)
 
     def clear(self, screen: surface.Surface) -> None:

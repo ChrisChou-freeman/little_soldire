@@ -7,22 +7,30 @@ from . import settings, game_start, game_editor, game_play
 from .lib import GameManager, GameMetaData, com_type
 from .ui import Tip
 
+
 class MainGame:
     def __init__(self) -> None:
         pygame.init()
         self._screen = self._create_screen()
         self._clock = pygame.time.Clock()
-        self._game_metadata = GameMetaData(settings.GAME_START, '', 0, com_type.ControlAction(), self._screen)
+        self._game_metadata = GameMetaData(
+            settings.GAME_START,
+            '',
+            0,
+            com_type.ControlAction(),
+            self._screen
+        )
         self._game_mode: dict[str, type[GameManager]] = {
             settings.GAME_START: game_start.GameStart,
             settings.GAME_EDITOR: game_editor.GameEditor,
             settings.GAME_PLAY: game_play.GamePlay
         }
-        self._game_manager: GameManager|None = None
+        self._game_manager: GameManager | None = None
 
     def _create_screen(self) -> surface.Surface:
-        flag = pygame.FULLSCREEN|pygame.SCALED if settings.FULL_SCRREN else 0
-        screen = display.set_mode((settings.SCREEN_WIDTH, settings.SCREEN_HEIGHT), flag)
+        flag = pygame.FULLSCREEN | pygame.SCALED if settings.FULL_SCRREN else 0
+        screen = display.set_mode(
+            (settings.SCREEN_WIDTH, settings.SCREEN_HEIGHT), flag)
         display.set_caption(settings.GAME_TITLE)
         return screen
 
@@ -35,7 +43,9 @@ class MainGame:
     def _draw_fps(self) -> None:
         if not settings.SHOW_FPS:
             return
-        tip_obj = Tip(f'FPS:{round(self._clock.get_fps())}', Vector2(settings.SCREEN_WIDTH - 20, 25), 25)
+        tip_obj = Tip(
+            f'FPS:{round(self._clock.get_fps())}',
+            Vector2(settings.SCREEN_WIDTH - 20, 25), 25)
         tip_obj.draw(self._screen)
 
     def _draw(self) -> None:

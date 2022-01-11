@@ -3,9 +3,11 @@ from dataclasses import dataclass
 
 from pygame import Vector2
 
+
 class Line(NamedTuple):
     start_point: Vector2
     eng_point: Vector2
+
 
 @dataclass
 class ControlAction:
@@ -13,4 +15,5 @@ class ControlAction:
     RUN_RIGHT: bool = False
     IDLE: bool = False
     JUMPING: bool = False
-    SHOOT:bool = False
+    SHOOT: bool = False
+    THROW_GRENADE: bool = False

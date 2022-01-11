@@ -13,8 +13,17 @@ class EnemySprite(role_sprite.RoleSprite):
                  tile_sprites: sprite.Group,
                  bullet_sprites: sprite.Group,
                  player_sprite: sprite.Group,
+                 grenade_sprites: sprite.Group,
+                 explode_sprites: sprite.Group,
                  metadata: GameMetaData) -> None:
-        super().__init__(sprite_sheet_info, position, tile_sprites, bullet_sprites, metadata)
+        super().__init__(
+            sprite_sheet_info,
+            position,
+            tile_sprites,
+            bullet_sprites,
+            grenade_sprites,
+            explode_sprites, metadata
+        )
         self._notice_symbol = image.load(settings.NOTICE_IMG_PATH)
         self._player_sprite = player_sprite
         self._ai_action = com_type.ControlAction()

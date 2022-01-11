@@ -1,7 +1,8 @@
 from pygame import Vector2, image, sprite, rect
 
 from .animation_sprite import AnimationSprite
-from .bullet_sprite import Bullet
+from . import bullet_sprite
+from . import grenade_sprite
 from ..lib import GameMetaData, com_type
 from .. import settings
 
@@ -11,8 +12,17 @@ class RoleSprite(AnimationSprite):
                  position: Vector2,
                  tile_sprites: sprite.Group,
                  bullet_sprites: sprite.Group,
+                 grenade_sprites: sprite.Group,
+                 explode_sprites: sprite.Group,
                  metadata: GameMetaData) -> None:
         self._sprite_sheet_info = sprite_sheet_info
+        self.position = position
+        self.metadata = metadata
+        self.tile_sprites = tile_sprites
+        self.bullet_sprites = bullet_sprites
+        self.grenade_sprites = grenade_sprites
+        self.explode_sprites = explode_sprites
+        self.grenade_img = image.load(settings.GRENADE_IMG_PATH)
         self.action = 'idle'
         self._jump_vect_y = 0.0
         self.attack_frequency = int(settings.FPS/3)
@@ -21,10 +31,6 @@ class RoleSprite(AnimationSprite):
         self.health_value = 100
         self._falling = False
         self.animation_playing = True
-        self.position = position
-        self.tile_sprites = tile_sprites
-        self.bullet_sprites = bullet_sprites
-        self.metadata = metadata
         self._set_current_action(init=True)
 
     def hit_detect(self, role: str) -> None:
@@ -112,7 +118,7 @@ class RoleSprite(AnimationSprite):
             speed_time = 1.0
         else:
             speed_time = 0.5
-        bs = Bullet(
+        bs = bullet_sprite.Bullet(
             self.metadata,
             bullet_img,
             Vector2(pos_x, pos_y),
@@ -143,6 +149,16 @@ class RoleSprite(AnimationSprite):
                 self._attack_counter += 1
             else:
                 self._attack_counter = 0
+            if control_action.THROW_GRENADE:
+                new_grenade = grenade_sprite.Grenade(
+                    self.metadata,
+                    self.grenade_img,
+                    self.position,
+                    -1 if self.flip else 1,
+                    self.tile_sprites
+                )
+                self.grenade_sprites.add(new_grenade) 
+                control_action.THROW_GRENADE = False
         if self.be_hiting_time > 0:
             self.be_hiting_time -= 1
             be_hit_action = f'{action}_hit'
