@@ -3,7 +3,7 @@ import os
 PRO_PATH = os.path.dirname(os.path.abspath(__file__))
 
 # engine stuff
-FULL_SCRREN = False
+FULL_SCRREN = True
 SHOW_FPS = True
 FPS = 60
 SCREEN_ORG_WIDTH = 800
@@ -30,6 +30,7 @@ GAME_PLAY_BACK_IMG_PATH = os.path.join(PRO_PATH, 'content/image/background')
 TILES_BTN_IMG_PATH = os.path.join(PRO_PATH, 'content/image/button/tileMenu.png')
 BULLET_IMG_PATH = os.path.join(PRO_PATH, 'content/image/bullet.png')
 GRENADE_IMG_PATH = os.path.join(PRO_PATH, 'content/image/grenade.png')
+EXPLODE_IMG_PATH = os.path.join(PRO_PATH, 'content/image/vex/explosion.png')
 NOTICE_IMG_PATH = os.path.join(PRO_PATH, 'content/image/notice.png')
 TILES_IMG_PATH = os.path.join(PRO_PATH, 'content/image/tiles')
 SPRITE_IMG_PATH = os.path.join(PRO_PATH, 'content/image/sprites')

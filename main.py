@@ -1,10 +1,10 @@
 #! /usr/bin/env python
-from engine import MainGame
+from engine import game
 
 
 def main() -> None:
-    game = MainGame()
-    game.run()
+    _game = game.MainGame()
+    _game.run()
 
 
 if __name__ == '__main__':

@@ -1,9 +1,8 @@
-from . import animation_sprite, cloud_sprite, tile_sprite, item_sprite, enemy_sprite, player_sprite
+from . import cloud_sprite, tile_sprite, item_sprite, role_sprite
 
-AnimationSprite =  animation_sprite.AnimationSprite
+# AnimationSprite =  animation_sprite.AnimationSprite
 CloudSprite = cloud_sprite.CloudSprite
-PlayerSprite = player_sprite.PlayerSprite
-EnemySprite = enemy_sprite.EnemySprite
+PlayerSprite = role_sprite.PlayerSprite
+EnemySprite = role_sprite.EnemySprite
 TileSprite = tile_sprite.TileSprite
 ItemSprite = item_sprite.ItemSprite
-

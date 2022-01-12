@@ -27,7 +27,7 @@ class Button:
         pos = key_kent.pos
         return self.rect.collidepoint(pos[0], pos[1])
 
-    def handle_input(self, key_event: event.Event, click_handle: Callable[[], None]=None) -> bool:
+    def handle_input(self, key_event: event.Event, click_handle: Callable[[], None] | None=None) -> bool:
         if key_event.type == pygame.MOUSEBUTTONDOWN:
             if key_event.button == pygame.BUTTON_LEFT:
                 self._selected = True if self._check_hover(key_event) else False

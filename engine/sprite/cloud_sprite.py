@@ -2,6 +2,7 @@ from pygame import sprite, surface, Vector2
 
 from .. import settings
 
+
 class CloudSprite(sprite.Sprite):
 
     def __init__(self,
@@ -14,7 +15,7 @@ class CloudSprite(sprite.Sprite):
         self.speed_time = speed_time
         self.couter = 0
 
-    def update(self, *_, **kwargs) -> None:
+    def update(self, *_, **kwargs: float) -> None:
         self.couter += 1
         dt: float = kwargs.get('dt', 0.0)
         dt *= 100

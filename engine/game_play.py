@@ -177,8 +177,8 @@ class GamePlay(lib.GameManager):
             menu.update()
         if self._game_pause:
             return
-        self._tile_sprites.update()
-        self._item_sprites.update()
+        self._tile_sprites.update(dt=dt)
+        self._item_sprites.update(dt=dt)
         self._player_sprites.update(dt=dt)
         self._enemy_sprites.update(dt=dt)
         self._bullet_sprites.update(dt=dt)

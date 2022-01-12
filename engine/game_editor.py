@@ -181,7 +181,8 @@ class GameEditor(GameManager):
             self._world_data.write_world_data(self._world_data_path)
         self._set_tiles(key_event)
 
-    def update(self, _) -> None:
+    def update(self, *_, **kwargs: float) -> None:
+        _ = kwargs['dt']
         self._scroll_backgroud()
 
     def _draw_grid(self, screen: surface.Surface) -> None:
