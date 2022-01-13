@@ -1,4 +1,5 @@
 import random
+from enum import Enum, auto
 
 from pygame import Vector2, image, sprite, rect, draw, surface, transform
 import pygame
@@ -6,6 +7,9 @@ import pygame
 from .. import lib
 from .. import settings
 
+class RoleType(Enum):
+    player = auto()
+    enemy = auto()
 
 class AnimationSprite(sprite.Sprite):
     def __init__(self,
@@ -13,20 +17,22 @@ class AnimationSprite(sprite.Sprite):
                  position: Vector2,
                  fram_with: int,
                  loop: bool = True,
-                 flip: bool = False) -> None:
+                 flip: bool = False,
+                 frequency: int = 6) -> None:
         super().__init__()
-        self.init_animation(image_sheet, position, fram_with, loop, flip)
+        self.init_animation(image_sheet, position, fram_with, loop, flip, frequency)
 
     def init_animation(self,
                        image_sheet: surface.Surface,
                        position: Vector2,
                        fram_with: int,
                        loop: bool = True,
-                       flip: bool = False) -> None:
+                       flip: bool = False,
+                       frequency: int = 6) -> None:
         self._current_fram = 0
         self._loop = loop
         self._counter = 0
-        self._frequency = 6
+        self._frequency = frequency
         self._playing = False
         self._image_sheet = image_sheet
         self._fram_with = fram_with
@@ -66,17 +72,17 @@ class AnimationSprite(sprite.Sprite):
         self.image = self._get_curren_fram()
         return playing
 
+
 class Bullet(sprite.Sprite):
-    def __init__(
-        self,
-        metadata: lib.GameMetaData,
-        image: surface.Surface,
-        position: Vector2,
-        vect: Vector2,
-        speed: int,
-        tile_sprites: sprite.Group,
-        bullet_type: str,
-        bullet_life_time: int) -> None:
+    def __init__(self,
+                 metadata: lib.GameMetaData,
+                 image: surface.Surface,
+                 position: Vector2,
+                 vect: Vector2,
+                 speed: int,
+                 tile_sprites: sprite.Group,
+                 bullet_type: RoleType,
+                 bullet_life_time: int) -> None:
         super().__init__()
         self.metadata = metadata
         self.image = image
@@ -111,26 +117,33 @@ class Bullet(sprite.Sprite):
                 self.kill()
                 return
 
-    def update(self, *_, **kwargs: float) -> None:
-        _ = kwargs['dt']
+    def update(self, *_, **kwargs) -> None:
         self.couter += 1
         dt: float = kwargs['dt']
         self._bullet_move(dt)
         self._bullet_kill_detect()
+
 
 class ExplodeSprite(AnimationSprite):
     def __init__(self,
                  image_sheet: surface.Surface,
                  position: Vector2,
                  fram_with: int,
-                 loop: bool = True,
-                 flip: bool = False) -> None:
-        super().__init__(image_sheet, position, fram_with, loop=loop, flip=flip)
-        self.explode_count = 0.0
+                 loop: bool = False) -> None:
+        position.x -= fram_with//2
+        position.y -= fram_with//2
+        super().__init__(
+            image_sheet,
+            position,
+            fram_with,
+            loop=loop,
+            frequency=3
+        )
 
-    def update(self, *_, **kwargs: float) -> None:
-        dt = kwargs['dt']
-        self.explode_count += dt
+    def update(self, *_, **__) -> None:
+        playing = self.play()
+        if not playing:
+            self.kill()
 
 
 class Grenade(sprite.Sprite):
@@ -141,16 +154,19 @@ class Grenade(sprite.Sprite):
                  position: Vector2,
                  direction: int,
                  tile_sprites: sprite.Group,
-                 explode_sprites: sprite.Group) -> None:
+                 explode_sprites: sprite.Group,
+                 grenade_type: RoleType) -> None:
         super().__init__()
+        self.grenade_type = grenade_type
         self.tile_sprites = tile_sprites
         self.throw_speed = 7
-        self.vect_y = -11
+        self.vect_y = -11.0
         self.metadata = metadata
         self.image = image
+        self.counter = 0
         self.explode_image = explode_image
         self.explode_sprites = explode_sprites
-        self.explode_time = settings.FPS * 3
+        self.explode_time = settings.FPS * 2
         self.rect = image.get_rect().move(position)
         self.direction = direction
 
@@ -163,12 +179,14 @@ class Grenade(sprite.Sprite):
             if self.rect is None or tile.rect is None:
                 continue
             is_collide_x = tile.rect.colliderect(
-                rect.Rect(self.rect.x + vect.x, self.rect.y, self.rect.width, self.rect.height)
+                rect.Rect(self.rect.x + vect.x, self.rect.y,
+                          self.rect.width, self.rect.height)
             )
             if is_collide_x:
                 vect.x *= -1
             is_collide_y = tile.rect.colliderect(
-                rect.Rect(self.rect.x, self.rect.y + vect.y, self.rect.width, self.rect.height)
+                rect.Rect(self.rect.x, self.rect.y + vect.y,
+                          self.rect.width, self.rect.height)
             )
             if is_collide_y:
                 if vect.y < 0:
@@ -185,9 +203,22 @@ class Grenade(sprite.Sprite):
         m_vect = self._collition_detect()
         self.rect = self.rect.move(m_vect)
 
-    def update(self, *_, **kwargs: float) -> None:
-        _ = kwargs['dt']
+    def _set_explode(self) -> None:
+        if self.rect is None:
+            return
+        explode_sprite = ExplodeSprite(
+            self.explode_image,
+            Vector2(self.rect.centerx, self.rect.centery),
+            80)
+        self.explode_sprites.add(explode_sprite)
+
+    def update(self, *_, **__) -> None:
         self._grenade_parabola()
+        self.counter += 1
+        if self.counter >= self.explode_time:
+            self._set_explode()
+            self.kill()
+
 
 class RoleSprite(AnimationSprite):
     def __init__(self,
@@ -218,23 +249,30 @@ class RoleSprite(AnimationSprite):
         self.animation_playing = True
         self._set_current_action(init=True)
 
-    def hit_detect(self, role: str) -> None:
+    def hit_detect(self, role: RoleType) -> None:
         if self.rect is None:
             return
+        # detect bullet damege
         for sprite in self.bullet_sprites:
             if self.health_value <= 0:
                 return
             if sprite.rect is None:
                 continue
             if sprite.rect.colliderect(self.rect):
-                bullet_type: str = sprite.__getattribute__('bullet_type')
-                if bullet_type == 'player' and role == 'enemy':
+                bullet_type: RoleType = getattr(sprite, 'bullet_type')
+                if bullet_type == RoleType.player and role == RoleType.enemy:
                     self.be_hiting_time = int(settings.FPS/10)
                     self.health_value -= settings.PLAYER_DAMEGE
                     sprite.kill()
-                elif bullet_type == 'enemy' and role == 'player':
+                elif bullet_type == RoleType.enemy and role == role.player:
                     self.health_value -= settings.ENEMY_DAMEGE
                     sprite.kill()
+        # detect explode damege
+        for exp in self.explode_sprites:
+            if exp.rect is None:
+                continue
+            if exp.rect.colliderect(self.rect):
+                self.health_value = 0
 
     def is_empty_health(self) -> bool:
         return self.health_value <= 0
@@ -249,7 +287,7 @@ class RoleSprite(AnimationSprite):
             self.kill()
             return
 
-    def _set_current_action(self, flip: bool=False, init: bool=False) -> None:
+    def _set_current_action(self, flip: bool = False, init: bool = False) -> None:
         action_info = self._sprite_sheet_info.get(self.action, None)
         if action_info is None:
             return
@@ -259,7 +297,8 @@ class RoleSprite(AnimationSprite):
         if init:
             super().__init__(image_sheet, self.position, fram_with, loop, flip)
         else:
-            self.init_animation(image_sheet, self.position, fram_with, loop, flip)
+            self.init_animation(image_sheet, self.position,
+                                fram_with, loop, flip)
         if self.image is None:
             return
 
@@ -284,7 +323,7 @@ class RoleSprite(AnimationSprite):
             self._falling = False
         return c_d_vect
 
-    def _shoot_bullet(self, role: str) -> None:
+    def _shoot_bullet(self, role: RoleType) -> None:
         if self.is_empty_health():
             return
         if self.rect is None:
@@ -293,11 +332,9 @@ class RoleSprite(AnimationSprite):
         pos_y = self.rect.bottom - int(self.rect.height / 2) - 5
         vect_x = -1 if self.flip else 1
         vect_y = 0
-        # bullet_speed = 0
         regular_bullet_speed = 500
         speed_time = 0.0
-        if role == 'player':
-            # bullet_speed = 500
+        if role == RoleType.player:
             speed_time = 1.0
         else:
             speed_time = 0.5
@@ -313,7 +350,20 @@ class RoleSprite(AnimationSprite):
         )
         self.bullet_sprites.add(bs)
 
-    def _get_action(self, control_action: lib.com_type.ControlAction, role: str = 'player') -> None:
+    def _throw_grenade(self, role: RoleType) -> None:
+        new_grenade = Grenade(
+            self.metadata,
+            self.grenade_img,
+            self.explode_img,
+            self.position,
+            -1 if self.flip else 1,
+            self.tile_sprites,
+            self.explode_sprites,
+            role
+        )
+        self.grenade_sprites.add(new_grenade)
+
+    def _get_action(self, control_action: lib.com_type.ControlAction, role: RoleType = RoleType.player) -> None:
         action = 'idle'
         if self.is_empty_health():
             action = 'death'
@@ -327,22 +377,13 @@ class RoleSprite(AnimationSprite):
             if control_action.JUMPING or self._falling:
                 action = 'jump'
             if control_action.SHOOT:
-                if self._attack_counter == 0 or self._attack_counter%self.attack_frequency == 0:
+                if self._attack_counter == 0 or self._attack_counter % self.attack_frequency == 0:
                     self._shoot_bullet(role)
                 self._attack_counter += 1
             else:
                 self._attack_counter = 0
             if control_action.THROW_GRENADE:
-                new_grenade = Grenade(
-                    self.metadata,
-                    self.grenade_img,
-                    self.explode_img,
-                    self.position,
-                    -1 if self.flip else 1,
-                    self.tile_sprites,
-                    self.explode_sprites
-                )
-                self.grenade_sprites.add(new_grenade) 
+                self._throw_grenade(role)
                 control_action.THROW_GRENADE = False
         if self.be_hiting_time > 0:
             self.be_hiting_time -= 1
@@ -359,13 +400,15 @@ class RoleSprite(AnimationSprite):
         for sprite in self.tile_sprites:
             if self.rect is None or sprite.rect is None:
                 return new_vect
-            is_collide_x =  sprite.rect.colliderect(
-                rect.Rect(self.rect.x + vect.x, self.rect.y, self.rect.width, self.rect.height)
+            is_collide_x = sprite.rect.colliderect(
+                rect.Rect(self.rect.x + vect.x, self.rect.y,
+                          self.rect.width, self.rect.height)
             )
             if is_collide_x:
                 new_vect.x = 0
             is_collide_y = sprite.rect.colliderect(
-                rect.Rect(self.rect.x, self.rect.y + vect.y, self.rect.width, self.rect.height)
+                rect.Rect(self.rect.x, self.rect.y + vect.y,
+                          self.rect.width, self.rect.height)
             )
             if is_collide_y:
                 if vect.y > 0:
@@ -384,14 +427,16 @@ class PlayerSprite(RoleSprite):
                  grenade_sprites: sprite.Group,
                  explode_sprites: sprite.Group,
                  metadata: lib.GameMetaData) -> None:
-        super().__init__(sprite_sheet_info, position, tile_sprites, bullet_sprites, grenade_sprites, explode_sprites, metadata)
+        super().__init__(sprite_sheet_info, position, tile_sprites,
+                         bullet_sprites, grenade_sprites, explode_sprites, metadata)
 
     def move(self) -> None:
         if self.rect is None:
             return
         if self.rect.x <= 0 and self.metadata.control_action.RUN_LEFT:
             return
-        self.rect = self.rect.move(self._get_vec_with_action(self.metadata.control_action))
+        self.rect = self.rect.move(
+            self._get_vec_with_action(self.metadata.control_action))
         self.position.x, self.position.y = self.rect.x, self.rect.y
         # scroll screen
         if self.rect.x < settings.SCREEN_WIDTH//2:
@@ -407,7 +452,8 @@ class PlayerSprite(RoleSprite):
         ratio = self.health_value / 100
         screen = self.metadata.scrren
         pygame.draw.rect(screen, settings.RGB_RED, (x, y, 150, 20))
-        pygame.draw.rect(screen, settings.RGB_YELLOW, (x, y, int(150 * ratio), 20))
+        pygame.draw.rect(screen, settings.RGB_YELLOW,
+                         (x, y, int(150 * ratio), 20))
 
     def _fall_off_screen_derect(self) -> None:
         if self.rect is None:
@@ -415,14 +461,14 @@ class PlayerSprite(RoleSprite):
         if self.rect.top >= settings.SCREEN_HEIGHT:
             self.health_value = 0
 
-    def update(self, *_, **kwargs: float) -> None:
-        _ = kwargs['dt']
+    def update(self, *_, **__) -> None:
+        # _ = kwargs['dt']
         if self.is_empty_health():
             self.metadata.GAME_OVER = True
         self.move()
         self._get_action(self.metadata.control_action)
         self.play()
-        self.hit_detect('player')
+        self.hit_detect(RoleType.player)
         self.hub()
         self._fall_off_screen_derect()
 
@@ -492,7 +538,7 @@ class EnemySprite(RoleSprite):
                 else:
                     self._ai_action.RUN_RIGHT = True
         if self._ai_action.RUN_LEFT:
-            if (self._wander_vectx*-1)  >= self._wander_distance:
+            if (self._wander_vectx*-1) >= self._wander_distance:
                 self._ai_action.RUN_LEFT = False
         elif self._ai_action.RUN_RIGHT:
             if self._wander_vectx >= 0:
@@ -547,13 +593,12 @@ class EnemySprite(RoleSprite):
         if self.rect.right < -50 or self.rect.top > settings.SCREEN_HEIGHT:
             self.kill()
 
-    def update(self, *_, **kwargs: float) -> None:
-        _ = kwargs['dt']
+    def update(self, *_, **__) -> None:
         self._ai()
         self._out_world_kill()
         self.move()
-        self._get_action(self._ai_action, 'enemy')
-        self.hit_detect('enemy')
+        self._get_action(self._ai_action, RoleType.enemy)
+        self.hit_detect(RoleType.enemy)
         self.animation_playing = self.play()
         self.death_disappear()
         self._draw_detected_symbol()

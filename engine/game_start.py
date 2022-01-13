@@ -89,4 +89,3 @@ class GameStart(GameManager):
     def clear(self, screen: surface.Surface) -> None:
         self.cloud_sprites.empty()
         screen.fill(settings.RGB_BLACK)
-

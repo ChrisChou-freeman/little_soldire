@@ -1,4 +1,5 @@
 import sys
+import typing
 
 import pygame
 from pygame import event, display, surface, Vector2
@@ -23,7 +24,7 @@ class MainGame:
             settings.GAME_EDITOR: game_editor.GameEditor,
             settings.GAME_PLAY: game_play.GamePlay
         }
-        self._game_manager: lib.GameManager | None = None
+        self._game_manager: typing.Optional[lib.GameManager] = None
 
     def _create_screen(self) -> surface.Surface:
         flag = pygame.FULLSCREEN | pygame.SCALED if settings.FULL_SCRREN else 0
@@ -67,11 +68,10 @@ class MainGame:
                 self._quit()
             if not isinstance(self._game_manager, self._game_mode[switch_mode]):
                 if self._game_manager is not None:
-                   del self._game_manager
+                    del self._game_manager
                 self._game_manager = self._game_mode[switch_mode](self._game_metadata)
             for key_event in event.get():
                 self._handle_input(key_event)
             self._draw()
             self._update(float(self._clock.get_time()/1000))
             self._clock.tick(settings.FPS)
-

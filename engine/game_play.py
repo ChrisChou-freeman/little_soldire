@@ -13,13 +13,18 @@ CONTINUE_MENU_LIST = [
     'Exit'
 ]
 
+
 class GamePlay(lib.GameManager):
     def __init__(self, metadata: lib.GameMetaData) -> None:
         super().__init__(metadata)
-        self._background_lays = lib.com_fuc.pygame_load_images_list(settings.GAME_PLAY_BACK_IMG_PATH)
-        self._tiles_images = lib.com_fuc.pygame_load_iamges_with_name(settings.TILES_IMG_PATH)
-        self._item_images = lib.com_fuc.pygame_load_iamges_with_name(settings.ITEMS_IMG_PATH)
-        self._sprite_images = lib.com_fuc.pygame_load_iamges_with_name(settings.SPRITE_IMG_PATH)
+        self._background_lays = lib.com_fuc.pygame_load_images_list(
+            settings.GAME_PLAY_BACK_IMG_PATH)
+        self._tiles_images = lib.com_fuc.pygame_load_iamges_with_name(
+            settings.TILES_IMG_PATH)
+        self._item_images = lib.com_fuc.pygame_load_iamges_with_name(
+            settings.ITEMS_IMG_PATH)
+        self._sprite_images = lib.com_fuc.pygame_load_iamges_with_name(
+            settings.SPRITE_IMG_PATH)
         self._init()
 
     def _init(self) -> None:
@@ -61,7 +66,6 @@ class GamePlay(lib.GameManager):
             )
             self._continue_menu_list.append(menu)
 
-
     def _init_sprite(self,
                      sprite: int,
                      position: Vector2) -> None:
@@ -101,23 +105,28 @@ class GamePlay(lib.GameManager):
             )
             if data_type == settings.IMG_TYPE_TILES:
                 img_surface = self._tiles_images[tile_name]
-                self._tile_sprites.add(_sprite.TileSprite(img_surface, position, self.metadata))
+                self._tile_sprites.add(_sprite.TileSprite(
+                    img_surface, position, self.metadata))
             elif data_type == settings.IMG_TYPE_SPRITES:
                 self._init_sprite(img, position)
             elif data_type == settings.IMG_TYPE_ITEMS:
                 img_surface = self._item_images[tile_name]
-                self._item_sprites.add(_sprite.ItemSprite(img_surface, position, self.metadata))
+                self._item_sprites.add(_sprite.ItemSprite(
+                    img_surface, position, self.metadata))
 
     def _init_content(self) -> None:
         # init background
         last_layer_width = self._background_lays[-1].get_width()
-        self._background_lays_pos = [Vector2(r * last_layer_width, i*80) \
-                for r in range(self._layers_repets) \
-                for i in range(len(self._background_lays))]
+        self._background_lays_pos = [Vector2(r * last_layer_width, i*80)
+                                     for r in range(self._layers_repets)
+                                     for i in range(len(self._background_lays))]
         # init tiles and items
-        self._init_word_data(settings.IMG_TYPE_ITEMS, self._world_data.items_data)
-        self._init_word_data(settings.IMG_TYPE_TILES, self._world_data.tiles_data)
-        self._init_word_data(settings.IMG_TYPE_SPRITES, self._world_data.sprites_data)
+        self._init_word_data(settings.IMG_TYPE_ITEMS,
+                             self._world_data.items_data)
+        self._init_word_data(settings.IMG_TYPE_TILES,
+                             self._world_data.tiles_data)
+        self._init_word_data(settings.IMG_TYPE_SPRITES,
+                             self._world_data.sprites_data)
         # init continue menu
         self._init_continue_menus()
 
@@ -168,8 +177,9 @@ class GamePlay(lib.GameManager):
 
     def _update_backgroud_scroll(self) -> None:
         for index, background_vec in enumerate(self._background_lays_pos):
-            lay_index = index%len(self._background_lays)
-            background_vec.x += self.metadata.scroll_value * ((lay_index+1)/len(self._background_lays))
+            lay_index = index % len(self._background_lays)
+            background_vec.x += self.metadata.scroll_value * \
+                ((lay_index+1)/len(self._background_lays))
 
     def update(self, dt: float) -> None:
         for index, menu in enumerate(self._continue_menu_list):
@@ -183,6 +193,7 @@ class GamePlay(lib.GameManager):
         self._enemy_sprites.update(dt=dt)
         self._bullet_sprites.update(dt=dt)
         self._grenade_sprites.update(dt=dt)
+        self._explode_sprites.update(dt=dt)
         self._update_backgroud_scroll()
 
     def _continue_menu(self, screen: surface.Surface) -> None:
@@ -191,15 +202,16 @@ class GamePlay(lib.GameManager):
 
     def _draw_death_fade(self, screen: surface.Surface) -> None:
         if self.metadata.GAME_OVER or self._game_pause:
-            sur = surface.Surface((settings.SCREEN_WIDTH, settings.SCREEN_HEIGHT), pygame.SRCALPHA)
+            sur = surface.Surface(
+                (settings.SCREEN_WIDTH, settings.SCREEN_HEIGHT), pygame.SRCALPHA)
             sur.fill(settings.RGBA_BLACK)
             screen.blit(sur, (0, 0))
             self._continue_menu(screen)
 
     def draw(self) -> None:
         screen = self.metadata.scrren
-        for index,lay_pos in enumerate(self._background_lays_pos):
-            lay = self._background_lays[index%len(self._background_lays)]
+        for index, lay_pos in enumerate(self._background_lays_pos):
+            lay = self._background_lays[index % len(self._background_lays)]
             screen.blit(lay, lay_pos)
         self._tile_sprites.draw(screen)
         self._item_sprites.draw(screen)
@@ -207,8 +219,8 @@ class GamePlay(lib.GameManager):
         self._enemy_sprites.draw(screen)
         self._bullet_sprites.draw(screen)
         self._grenade_sprites.draw(screen)
+        self._explode_sprites.draw(screen)
         self._draw_death_fade(screen)
 
     def clear(self, screen: surface.Surface) -> None:
         screen.fill(settings.RGB_BLACK)
-

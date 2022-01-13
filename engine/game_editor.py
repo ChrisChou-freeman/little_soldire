@@ -4,7 +4,7 @@ import pygame
 from pygame import surface, event, Vector2, draw, image
 
 from  . import settings
-from .ui import Button, ButtonContainer, Tip
+from . import ui
 from .lib import GameManager, com_fuc, com_type, KeyMap, GameDataStruct, GameMetaData
 
 TIP_MSG = {
@@ -23,11 +23,11 @@ class GameEditor(GameManager):
         self._background_lays = com_fuc.pygame_load_images_list(settings.GAME_PLAY_BACK_IMG_PATH)
         self._background_lays_pos: list[Vector2] = []
         self._grid_line: list[com_type.Line] = []
-        self._tiles_button = Button(image.load(settings.TILES_BTN_IMG_PATH), Vector2(20, 20), '')
+        self._tiles_button = ui.Button(image.load(settings.TILES_BTN_IMG_PATH), Vector2(20, 20), '')
         self._tiles_images = com_fuc.pygame_load_iamges_with_name(settings.TILES_IMG_PATH)
         self._item_images = com_fuc.pygame_load_iamges_with_name(settings.ITEMS_IMG_PATH)
         self._sprite_images = com_fuc.pygame_load_iamges_with_name(settings.SPRITE_IMG_PATH)
-        self._menu_container = ButtonContainer(
+        self._menu_container = ui.ButtonContainer(
             Vector2(0, 0),
             settings.SCREEN_WIDTH,
             int(settings.SCREEN_HEIGHT/3),
@@ -46,7 +46,7 @@ class GameEditor(GameManager):
         self._surface_scroll_value = 0
         self._world_data_path = os.path.join(settings.WORLD_DATA_PATH, f'{self._current_level}.pk')
         self._world_data = GameDataStruct.load_world_data(self._world_data_path)
-        self._tip: dict[str, list[Tip]] = {}
+        self._tip: dict[str, list[ui.Tip]] = {}
         self._init_content()
 
     def _init_content(self) -> None:
@@ -75,7 +75,7 @@ class GameEditor(GameManager):
             if self._tip.get(tip_type) is None:
                 self._tip[tip_type] = []
             for index, msg in enumerate(msgs):
-                tip_obj = Tip(msg, Vector2(tip_start[0], tip_start[1] - tip_gap*index), 25)
+                tip_obj = ui.Tip(msg, Vector2(tip_start[0], tip_start[1] - tip_gap*index), 25)
                 self._tip[tip_type].append(tip_obj)
 
     def _scroll_backgroud(self) -> None:
@@ -181,8 +181,8 @@ class GameEditor(GameManager):
             self._world_data.write_world_data(self._world_data_path)
         self._set_tiles(key_event)
 
-    def update(self, *_, **kwargs: float) -> None:
-        _ = kwargs['dt']
+    def update(self, _) -> None:
+        # _ = kwargs['dt']
         self._scroll_backgroud()
 
     def _draw_grid(self, screen: surface.Surface) -> None:
@@ -220,7 +220,7 @@ class GameEditor(GameManager):
 
     def _draw_tips(self, screen: surface.Surface) -> None:
         '''draw key function tip messages in screen'''
-        tips_list: list[Tip] = []
+        tips_list: list[ui.Tip] = []
         if self._menu_container.show:
             tips_list = self._tip['show_container']
         else:
@@ -230,7 +230,7 @@ class GameEditor(GameManager):
 
     def _draw_level_number(self, screen: surface.Surface) -> None:
         position = Vector2(settings.SCREEN_WIDTH - 20, 40)
-        tip_obj = Tip(f'current level:{self._current_level}', position, 25)
+        tip_obj = ui.Tip(f'current level:{self._current_level}', position, 25)
         tip_obj.draw(screen)
 
     def draw(self) -> None:
@@ -249,4 +249,3 @@ class GameEditor(GameManager):
 
     def clear(self, screen: surface.Surface) -> None:
         screen.fill(settings.RGB_BLACK)
-
