@@ -11,7 +11,7 @@
 * (done)enemy simple AI
 * (done)better jumping action
 * (done)enemy detect notice symbol 
-* (doing)throw grenade & explode shake
+* (done)throw grenade & explode shake
 * (doing)simple play hud
-* (doing) add game difficulty level
+* (doing)add game difficulty level
 * (doing)sound effect
