@@ -23,3 +23,4 @@ class ItemSprite(sprite.Sprite):
         self.rect.y = int(self.position.y + self.metadata.screen_shake_y)
         if self.rect.right < 0:
             self.kill()
+

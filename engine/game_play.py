@@ -222,7 +222,11 @@ class GamePlay(lib.GameManager):
         screen = self.metadata.scrren
         for index, lay_pos in enumerate(self._background_lays_pos):
             lay = self._background_lays[index % len(self._background_lays)]
-            screen.blit(lay, lay_pos)
+            new_lay_pos = pg.Vector2(
+                lay_pos.x + self.metadata.screen_shake_x,
+                lay_pos.y + self.metadata.screen_shake_y
+            )
+            screen.blit(lay, new_lay_pos)
         self._tile_sprites.draw(screen)
         self._item_sprites.draw(screen)
         self._player_sprites.draw(screen)
