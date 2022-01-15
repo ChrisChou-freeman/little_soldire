@@ -1,23 +1,21 @@
 import os
 
-from pygame import surface, event, sprite, image, Vector2
+import pygame as pg
 
-from .lib import GameManager, KeyMap, GameMetaData
-from .ui import Menu
-from .sprite import CloudSprite
-from . import settings
 
-class GameStart(GameManager):
-    def __init__(self, metadata: GameMetaData) -> None:
+from . import lib, ui, sprite as _sprite, settings
+
+class GameStart(lib.GameManager):
+    def __init__(self, metadata: lib.GameMetaData) -> None:
         super().__init__(metadata)
-        self.cloud_sprites = sprite.Group()
-        self._background_lays: list[surface.Surface] = []
+        self.cloud_sprites = pg.sprite.Group()
+        self._background_lays: list[pg.surface.Surface] = []
         self._background_lays_pos = [
-            Vector2(0, 0),
-            Vector2(0, 0),
-            Vector2(0, 230),
-            Vector2(0, 250),
-            Vector2(0, 250),
+            pg.Vector2(0, 0),
+            pg.Vector2(0, 0),
+            pg.Vector2(0, 230),
+            pg.Vector2(0, 250),
+            pg.Vector2(0, 250),
         ]
         self._lay_number = 5
         self._cloud_number = 3
@@ -28,23 +26,23 @@ class GameStart(GameManager):
             settings.GAME_EDITOR,
             settings.GAME_EXIT
         ]
-        self._menus: list[Menu] = []
+        self._menus: list[ui.Menu] = []
         self._select_menu_key = 0
         self._load_content()
 
     def _load_content(self) -> None:
         # load background lays
         for lay in range(self._lay_number):
-            lay_img = image.load(os.path.join(settings.GAME_START_IMG_PATH, f'layer{lay}.png'))
+            lay_img = pg.image.load(os.path.join(settings.GAME_START_IMG_PATH, f'layer{lay}.png'))
             self._background_lays.append(lay_img)
         # load clouds
         for lay in range(self._cloud_number):
-            cloud_img = image.load(os.path.join(settings.GAME_START_IMG_PATH, f'cloud_layer{lay}.png')).convert_alpha()
-            cloud_sprite = CloudSprite(cloud_img, Vector2(0,0), self._cloud_number*3 - lay*3)
+            cloud_img = pg.image.load(os.path.join(settings.GAME_START_IMG_PATH, f'cloud_layer{lay}.png')).convert_alpha()
+            cloud_sprite = _sprite.CloudSprite(cloud_img, pg.Vector2(0,0), self._cloud_number*3 - lay*3)
             self.cloud_sprites.add(cloud_sprite)
         # load menu
         for index, name in enumerate(self._menu_list):
-            menu = Menu(name, Vector2(70, int(settings.SCREEN_HEIGHT/2) + self._menu_gap * index), self._menu_size)
+            menu = ui.Menu(name, pg.Vector2(70, int(settings.SCREEN_HEIGHT/2) + self._menu_gap * index), self._menu_size)
             self._menus.append(menu)
         self._key_menu_select_handle()
 
@@ -64,8 +62,8 @@ class GameStart(GameManager):
             self._select_menu_key = len(self._menus) - 1
         self._key_menu_select_handle()
 
-    def handle_input(self, key_event: event.Event) -> None:
-        key_map = KeyMap(key_event)
+    def handle_input(self, key_event: pg.event.Event) -> None:
+        key_map = lib.KeyMap(key_event)
         if key_map.key_up_press():
             self._menus_swich('up')
         elif key_map.key_down_press():
@@ -86,6 +84,6 @@ class GameStart(GameManager):
         for menu in self._menus:
             menu.draw(screen)
 
-    def clear(self, screen: surface.Surface) -> None:
+    def clear(self, screen: pg.surface.Surface) -> None:
         self.cloud_sprites.empty()
         screen.fill(settings.RGB_BLACK)

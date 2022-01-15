@@ -1,6 +1,7 @@
 import os
 import pickle
 from dataclasses import dataclass
+from typing import Optional
 
 from pygame import surface
 
@@ -11,7 +12,11 @@ from .common_type import ControlAction
 class GameMetaData:
     game_mode: str
     level_edit_tile: str
-    scroll_value: int
+    scroll_value_x: int
+    scroll_value_y: int
+    screen_shake: int
+    screen_shake_x: int
+    screen_shake_y: int
     control_action: ControlAction
     scrren: surface.Surface
     GAME_OVER: bool = False
@@ -40,7 +45,7 @@ class GameDataStruct:
                     return
 
     def _delete_tile_by_pos_with_type(self, x: int, y: int, img_type: str) -> None:
-        imgs_list: list[dict[str, int]]|None = None
+        imgs_list: Optional[list[dict[str, int]]] = None
         if img_type == settings.IMG_TYPE_TILES:
             imgs_list = self.tiles_data
         elif img_type == settings.IMG_TYPE_SPRITES:

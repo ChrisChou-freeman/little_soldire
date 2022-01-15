@@ -1,18 +1,14 @@
 import os
+import random
 
-import pygame
-from pygame import surface, event, Vector2, sprite
+import pygame as pg
 
-from . import lib
-from . import sprite as _sprite
-from . import settings
-from . import ui
+from . import lib, sprite as _sprite, settings, ui
 
 CONTINUE_MENU_LIST = [
     'Restart',
     'Exit'
 ]
-
 
 class GamePlay(lib.GameManager):
     def __init__(self, metadata: lib.GameMetaData) -> None:
@@ -30,7 +26,7 @@ class GamePlay(lib.GameManager):
     def _init(self) -> None:
         self.metadata.control_action = lib.com_type.ControlAction()
         self.metadata.GAME_OVER = False
-        self._background_lays_pos: list[Vector2] = []
+        self._background_lays_pos: list[pg.Vector2] = []
         self._layers_repets = 2
         self._current_level = 0
         self._grenade_number = 3
@@ -39,14 +35,14 @@ class GamePlay(lib.GameManager):
         self._world_data = lib.GameDataStruct.load_world_data(
             os.path.join(settings.WORLD_DATA_PATH, f'{self._current_level}.pk')
         )
-        self._player_sprites = sprite.Group()
-        self._enemy_sprites = sprite.Group()
-        self._tile_sprites = sprite.Group()
-        self._item_sprites = sprite.Group()
-        self._bullet_sprites = sprite.Group()
-        self._debug_sprites = sprite.Group()
-        self._grenade_sprites = sprite.Group()
-        self._explode_sprites = sprite.Group()
+        self._player_sprites = pg.sprite.Group()
+        self._enemy_sprites = pg.sprite.Group()
+        self._tile_sprites = pg.sprite.Group()
+        self._item_sprites = pg.sprite.Group()
+        self._bullet_sprites = pg.sprite.Group()
+        self._debug_sprites = pg.sprite.Group()
+        self._grenade_sprites = pg.sprite.Group()
+        self._explode_sprites = pg.sprite.Group()
         self._continue_menu_list: list[ui.Menu] = []
         self._selected_continue_menu = 0
         self._init_content()
@@ -57,7 +53,7 @@ class GamePlay(lib.GameManager):
         for index, m in enumerate(CONTINUE_MENU_LIST):
             menu = ui.Menu(
                 m,
-                Vector2(
+                pg.Vector2(
                     settings.SCREEN_WIDTH//2,
                     settings.SCREEN_HEIGHT//2 + menu_gap * index
                 ),
@@ -68,7 +64,7 @@ class GamePlay(lib.GameManager):
 
     def _init_sprite(self,
                      sprite: int,
-                     position: Vector2) -> None:
+                     position: pg.Vector2) -> None:
         if sprite in settings.PLAYER_TILES:
             player_sprite = _sprite.PlayerSprite(
                 settings.PLAYER1_IMG_PATH_MAP,
@@ -99,7 +95,7 @@ class GamePlay(lib.GameManager):
         for data_info in datas_info:
             x, y, img = data_info['x'], data_info['y'], data_info['img']
             tile_name = f'{data_type}_{img}.png'
-            position = Vector2(
+            position = pg.Vector2(
                 x * settings.TILE_SIZE[0],
                 y * settings.TILE_SIZE[1]
             )
@@ -117,7 +113,7 @@ class GamePlay(lib.GameManager):
     def _init_content(self) -> None:
         # init background
         last_layer_width = self._background_lays[-1].get_width()
-        self._background_lays_pos = [Vector2(r * last_layer_width, i*80)
+        self._background_lays_pos = [pg.Vector2(r * last_layer_width, i*80)
                                      for r in range(self._layers_repets)
                                      for i in range(len(self._background_lays))]
         # init tiles and items
@@ -168,7 +164,7 @@ class GamePlay(lib.GameManager):
         elif key_map.key_back_press():
             self._game_pause = False
 
-    def handle_input(self, key_event: event.Event) -> None:
+    def handle_input(self, key_event: pg.event.Event) -> None:
         key_map = lib.KeyMap(key_event)
         if self.metadata.GAME_OVER or self._game_pause:
             self.handle_input_continue(key_map)
@@ -178,10 +174,24 @@ class GamePlay(lib.GameManager):
     def _update_backgroud_scroll(self) -> None:
         for index, background_vec in enumerate(self._background_lays_pos):
             lay_index = index % len(self._background_lays)
-            background_vec.x += self.metadata.scroll_value * \
+            background_vec.x += (self.metadata.scroll_value_x) * \
+                ((lay_index+1)/len(self._background_lays))
+            background_vec.y += self.metadata.scroll_value_y * \
                 ((lay_index+1)/len(self._background_lays))
 
+    def _screen_shake_control(self) -> None:
+        if self.metadata.screen_shake <= 0:
+            self.metadata.screen_shake = 0
+            self.metadata.screen_shake_x= 0
+            self.metadata.screen_shake_y= 0
+            return
+        self.metadata.screen_shake -= 1
+        random_value = random.randint(0, 8) -4
+        self.metadata.screen_shake_x = random_value
+        self.metadata.screen_shake_y = random_value
+
     def update(self, dt: float) -> None:
+        self._screen_shake_control()
         for index, menu in enumerate(self._continue_menu_list):
             menu.be_select = True if index == self._selected_continue_menu else False
             menu.update()
@@ -196,14 +206,14 @@ class GamePlay(lib.GameManager):
         self._explode_sprites.update(dt=dt)
         self._update_backgroud_scroll()
 
-    def _continue_menu(self, screen: surface.Surface) -> None:
+    def _continue_menu(self, screen: pg.surface.Surface) -> None:
         for menu in self._continue_menu_list:
             menu.draw(screen)
 
-    def _draw_death_fade(self, screen: surface.Surface) -> None:
+    def _draw_death_fade(self, screen: pg.surface.Surface) -> None:
         if self.metadata.GAME_OVER or self._game_pause:
-            sur = surface.Surface(
-                (settings.SCREEN_WIDTH, settings.SCREEN_HEIGHT), pygame.SRCALPHA)
+            sur = pg.surface.Surface(
+                (settings.SCREEN_WIDTH, settings.SCREEN_HEIGHT), pg.SRCALPHA)
             sur.fill(settings.RGBA_BLACK)
             screen.blit(sur, (0, 0))
             self._continue_menu(screen)
@@ -222,5 +232,5 @@ class GamePlay(lib.GameManager):
         self._explode_sprites.draw(screen)
         self._draw_death_fade(screen)
 
-    def clear(self, screen: surface.Surface) -> None:
+    def clear(self, screen: pg.surface.Surface) -> None:
         screen.fill(settings.RGB_BLACK)

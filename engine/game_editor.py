@@ -1,11 +1,9 @@
 import os
+from typing import Optional
 
-import pygame
-from pygame import surface, event, Vector2, draw, image
+import pygame as pg
 
-from  . import settings
-from . import ui
-from .lib import GameManager, com_fuc, com_type, KeyMap, GameDataStruct, GameMetaData
+from  . import settings, ui, lib
 
 TIP_MSG = {
     'regular': [
@@ -17,18 +15,18 @@ TIP_MSG = {
     ]
 }
 
-class GameEditor(GameManager):
-    def __init__(self, metadata: GameMetaData) -> None:
+class GameEditor(lib.GameManager):
+    def __init__(self, metadata: lib.GameMetaData) -> None:
         super().__init__(metadata)
-        self._background_lays = com_fuc.pygame_load_images_list(settings.GAME_PLAY_BACK_IMG_PATH)
-        self._background_lays_pos: list[Vector2] = []
-        self._grid_line: list[com_type.Line] = []
-        self._tiles_button = ui.Button(image.load(settings.TILES_BTN_IMG_PATH), Vector2(20, 20), '')
-        self._tiles_images = com_fuc.pygame_load_iamges_with_name(settings.TILES_IMG_PATH)
-        self._item_images = com_fuc.pygame_load_iamges_with_name(settings.ITEMS_IMG_PATH)
-        self._sprite_images = com_fuc.pygame_load_iamges_with_name(settings.SPRITE_IMG_PATH)
+        self._background_lays = lib.com_fuc.pygame_load_images_list(settings.GAME_PLAY_BACK_IMG_PATH)
+        self._background_lays_pos: list[pg.Vector2] = []
+        self._grid_line: list[lib.com_type.Line] = []
+        self._tiles_button = ui.Button(pg.image.load(settings.TILES_BTN_IMG_PATH), pg.Vector2(20, 20), '')
+        self._tiles_images = lib.com_fuc.pygame_load_iamges_with_name(settings.TILES_IMG_PATH)
+        self._item_images = lib.com_fuc.pygame_load_iamges_with_name(settings.ITEMS_IMG_PATH)
+        self._sprite_images = lib.com_fuc.pygame_load_iamges_with_name(settings.SPRITE_IMG_PATH)
         self._menu_container = ui.ButtonContainer(
-            Vector2(0, 0),
+            pg.Vector2(0, 0),
             settings.SCREEN_WIDTH,
             int(settings.SCREEN_HEIGHT/3),
             settings.RGB_GRAY,
@@ -45,27 +43,27 @@ class GameEditor(GameManager):
         self._holde_mouse_right = False
         self._surface_scroll_value = 0
         self._world_data_path = os.path.join(settings.WORLD_DATA_PATH, f'{self._current_level}.pk')
-        self._world_data = GameDataStruct.load_world_data(self._world_data_path)
+        self._world_data = lib.GameDataStruct.load_world_data(self._world_data_path)
         self._tip: dict[str, list[ui.Tip]] = {}
         self._init_content()
 
     def _init_content(self) -> None:
         # init background
         last_layer_width = self._background_lays[-1].get_width()
-        self._background_lays_pos = [Vector2(r * last_layer_width, i*80) \
+        self._background_lays_pos = [pg.Vector2(r * last_layer_width, i*80) \
                 for r in range(self._layers_repets) \
                 for i in range(len(self._background_lays))]
         # init grid
         for y_line in range(0, settings.SCREEN_HEIGHT, settings.TILE_SIZE[1]):
-            line = com_type.Line(
-                Vector2(0, y_line),
-                Vector2(last_layer_width*self._layers_repets, y_line)
+            line = lib.com_type.Line(
+                pg.Vector2(0, y_line),
+                pg.Vector2(last_layer_width*self._layers_repets, y_line)
             )
             self._grid_line.append(line)
         for x_line in range(0, last_layer_width*self._layers_repets, settings.TILE_SIZE[0]):
-            line = com_type.Line(
-                Vector2(x_line, 0),
-                Vector2(x_line, settings.SCREEN_HEIGHT)
+            line = lib.com_type.Line(
+                pg.Vector2(x_line, 0),
+                pg.Vector2(x_line, settings.SCREEN_HEIGHT)
             )
             self._grid_line.append(line)
         # init tip
@@ -75,7 +73,7 @@ class GameEditor(GameManager):
             if self._tip.get(tip_type) is None:
                 self._tip[tip_type] = []
             for index, msg in enumerate(msgs):
-                tip_obj = ui.Tip(msg, Vector2(tip_start[0], tip_start[1] - tip_gap*index), 25)
+                tip_obj = ui.Tip(msg, pg.Vector2(tip_start[0], tip_start[1] - tip_gap*index), 25)
                 self._tip[tip_type].append(tip_obj)
 
     def _scroll_backgroud(self) -> None:
@@ -108,7 +106,7 @@ class GameEditor(GameManager):
             self._tiles_button.rect.top += self._menu_container.rec.height
             self._tiles_button.rect_selected.top += self._menu_container.rec.height
 
-    def _has_grid_area(self, key_event: event.Event) -> bool:
+    def _has_grid_area(self, key_event: pg.event.Event) -> bool:
         pos = key_event.pos
         if self._menu_container.show and self._menu_container.rec.collidepoint(pos):
             return False
@@ -116,19 +114,19 @@ class GameEditor(GameManager):
             return False
         return True
 
-    def _set_tiles(self, key_event: event.Event) -> None:
+    def _set_tiles(self, key_event: pg.event.Event) -> None:
         '''draw tiles in editor mode'''
-        if key_event.type == pygame.MOUSEBUTTONDOWN:
-            if key_event.button == pygame.BUTTON_LEFT:
+        if key_event.type == pg.MOUSEBUTTONDOWN:
+            if key_event.button == pg.BUTTON_LEFT:
                 self._holde_mouse_left = True
-            elif key_event.button == pygame.BUTTON_RIGHT:
+            elif key_event.button == pg.BUTTON_RIGHT:
                 self._holde_mouse_right = True
-        elif key_event.type == pygame.MOUSEBUTTONUP:
-            if key_event.button == pygame.BUTTON_LEFT:
+        elif key_event.type == pg.MOUSEBUTTONUP:
+            if key_event.button == pg.BUTTON_LEFT:
                 self._holde_mouse_left = False
-            elif key_event.button == pygame.BUTTON_RIGHT:
+            elif key_event.button == pg.BUTTON_RIGHT:
                 self._holde_mouse_right = False
-        elif key_event.type == pygame.MOUSEMOTION:
+        elif key_event.type == pg.MOUSEMOTION:
             mouse_x = key_event.pos[0] - self._surface_scroll_value
             tile_x, tile_y = mouse_x//32, key_event.pos[1]//32
             if tile_y > settings.SCREEN_HEIGHT//32-1:
@@ -157,10 +155,10 @@ class GameEditor(GameManager):
         elif self._current_level > settings.MAX_LEVEL:
             self._current_level = settings.MAX_LEVEL
 
-    def handle_input(self, key_event: event.Event) -> None:
+    def handle_input(self, key_event: pg.event.Event) -> None:
         self._tiles_button.handle_input(key_event, self._tiles_button_click)
         self._menu_container.handle_input(key_event)
-        key_map = KeyMap(key_event)
+        key_map = lib.KeyMap(key_event)
         if key_map.key_left_press():
             self._scroll_left = True
         elif key_map.key_right_press():
@@ -185,28 +183,28 @@ class GameEditor(GameManager):
         # _ = kwargs['dt']
         self._scroll_backgroud()
 
-    def _draw_grid(self, screen: surface.Surface) -> None:
+    def _draw_grid(self, screen: pg.surface.Surface) -> None:
         if not self._show_grid:
             return
         for line in self._grid_line:
-            start_point = Vector2(
+            start_point = pg.Vector2(
                 line.start_point.x + self._surface_scroll_value,
                 line.start_point.y
             )
-            eng_point = Vector2(
+            eng_point = pg.Vector2(
                 line.eng_point.x + self._surface_scroll_value,
                 line.eng_point.y
             )
-            draw.line(screen, settings.RGB_WHITE, start_point, eng_point)
+            pg.draw.line(screen, settings.RGB_WHITE, start_point, eng_point)
 
     def _draw_world_data(self,
-            screen: surface.Surface,
+            screen: pg.surface.Surface,
             datas_info: list[dict[str, int]],
             img_type: str) -> None:
         for data_info in datas_info:
             x, y, img = data_info['x'], data_info['y'], data_info['img']
             tile_name = f'{img_type}_{img}.png'
-            img_surface: surface.Surface|None = None
+            img_surface: Optional[pg.surface.Surface] = None
             if img_type == settings.IMG_TYPE_TILES:
                 img_surface = self._tiles_images[tile_name]
             elif img_type == settings.IMG_TYPE_SPRITES:
@@ -216,9 +214,9 @@ class GameEditor(GameManager):
             x_pos = x * settings.TILE_SIZE[0] + self._surface_scroll_value
             y_pos = y * settings.TILE_SIZE[1]
             if img_surface is not None:
-                screen.blit(img_surface, Vector2(x_pos, y_pos))
+                screen.blit(img_surface, pg.Vector2(x_pos, y_pos))
 
-    def _draw_tips(self, screen: surface.Surface) -> None:
+    def _draw_tips(self, screen: pg.surface.Surface) -> None:
         '''draw key function tip messages in screen'''
         tips_list: list[ui.Tip] = []
         if self._menu_container.show:
@@ -228,8 +226,8 @@ class GameEditor(GameManager):
         for tip in tips_list:
             tip.draw(screen)
 
-    def _draw_level_number(self, screen: surface.Surface) -> None:
-        position = Vector2(settings.SCREEN_WIDTH - 20, 40)
+    def _draw_level_number(self, screen: pg.surface.Surface) -> None:
+        position = pg.Vector2(settings.SCREEN_WIDTH - 20, 40)
         tip_obj = ui.Tip(f'current level:{self._current_level}', position, 25)
         tip_obj.draw(screen)
 
@@ -247,5 +245,5 @@ class GameEditor(GameManager):
         self._draw_tips(screen)
         self._draw_level_number(screen)
 
-    def clear(self, screen: surface.Surface) -> None:
+    def clear(self, screen: pg.surface.Surface) -> None:
         screen.fill(settings.RGB_BLACK)

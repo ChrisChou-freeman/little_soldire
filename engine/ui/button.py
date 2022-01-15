@@ -1,20 +1,20 @@
+from typing import Optional
 from collections.abc import Callable
 
-import pygame
-from pygame import surface, Vector2, event, Rect, draw
+import pygame as pg
 
 from .. import settings
 
 class Button:
     def __init__(
             self,
-            b_img: surface.Surface,
-            position: Vector2,
+            b_img: pg.surface.Surface,
+            position: pg.Vector2,
             btn_name: str) -> None:
         self.btn_name = btn_name
         self.position = position
-        self.rect = Rect(position.x, position.y, b_img.get_width(), b_img.get_height())
-        self.rect_selected = Rect(
+        self.rect = pg.Rect(position.x, position.y, b_img.get_width(), b_img.get_height())
+        self.rect_selected = pg.Rect(
             position.x-1,
             position.y-1,
             b_img.get_width()+2,
@@ -23,16 +23,16 @@ class Button:
         self._b_img = b_img
         self._selected = False
 
-    def _check_hover(self, key_kent: event.Event) -> bool:
+    def _check_hover(self, key_kent: pg.event.Event) -> bool:
         pos = key_kent.pos
         return self.rect.collidepoint(pos[0], pos[1])
 
-    def handle_input(self, key_event: event.Event, click_handle: Callable[[], None] | None=None) -> bool:
-        if key_event.type == pygame.MOUSEBUTTONDOWN:
-            if key_event.button == pygame.BUTTON_LEFT:
+    def handle_input(self, key_event: pg.event.Event, click_handle: Optional[Callable[[], None]]=None) -> bool:
+        if key_event.type == pg.MOUSEBUTTONDOWN:
+            if key_event.button == pg.BUTTON_LEFT:
                 self._selected = True if self._check_hover(key_event) else False
-        elif key_event.type == pygame.MOUSEBUTTONUP:
-            if key_event.button == pygame.BUTTON_LEFT:
+        elif key_event.type == pg.MOUSEBUTTONUP:
+            if key_event.button == pg.BUTTON_LEFT:
                 self._selected = False
                 if self._check_hover(key_event):
                     if click_handle is not None: click_handle()
@@ -42,8 +42,8 @@ class Button:
     def update(self) -> None:
         pass
 
-    def draw(self, screen: surface.Surface) -> None:
+    def draw(self, screen: pg.surface.Surface) -> None:
         screen.blit(self._b_img, self.position)
         if self._selected:
-            draw.rect(screen, settings.RGB_YELLOW, self.rect_selected, 1)
+            pg.draw.rect(screen, settings.RGB_YELLOW, self.rect_selected, 1)
 

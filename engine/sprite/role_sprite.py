@@ -86,6 +86,7 @@ class Bullet(sprite.Sprite):
         super().__init__()
         self.metadata = metadata
         self.image = image
+        self.position = position
         self.rect = image.get_rect().move(position)
         self.speed = speed
         self.vect = vect
@@ -97,7 +98,7 @@ class Bullet(sprite.Sprite):
     def _bullet_move(self, dt: float) -> None:
         if self.rect is None:
             return
-        self.rect.x += self.metadata.scroll_value
+        self.rect.x += self.metadata.scroll_value_x
         move_x = dt * self.speed * self.vect.x
         self.rect.x += round(move_x)
 
@@ -184,6 +185,7 @@ class Grenade(sprite.Sprite):
             )
             if is_collide_x:
                 vect.x *= -1
+                self.direction *= -1
             is_collide_y = tile.rect.colliderect(
                 rect.Rect(self.rect.x, self.rect.y + vect.y,
                           self.rect.width, self.rect.height)
@@ -199,7 +201,7 @@ class Grenade(sprite.Sprite):
     def _grenade_parabola(self) -> None:
         if self.rect is None:
             return
-        self.rect.x += self.metadata.scroll_value
+        self.rect.x += self.metadata.scroll_value_x
         m_vect = self._collition_detect()
         self.rect = self.rect.move(m_vect)
 
@@ -210,6 +212,7 @@ class Grenade(sprite.Sprite):
             self.explode_image,
             Vector2(self.rect.centerx, self.rect.centery),
             80)
+        self.metadata.screen_shake = 10
         self.explode_sprites.add(explode_sprite)
 
     def update(self, *_, **__) -> None:
@@ -440,11 +443,11 @@ class PlayerSprite(RoleSprite):
         self.position.x, self.position.y = self.rect.x, self.rect.y
         # scroll screen
         if self.rect.x < settings.SCREEN_WIDTH//2:
-            self.metadata.scroll_value = 0
+            self.metadata.scroll_value_x = 0
             return
         forward_distance = settings.SCREEN_WIDTH//2 - self.rect.x
         self.rect.x = settings.SCREEN_WIDTH//2
-        self.metadata.scroll_value = forward_distance
+        self.metadata.scroll_value_x = forward_distance
 
     def hub(self) -> None:
         x = 10
@@ -556,7 +559,7 @@ class EnemySprite(RoleSprite):
     def move(self) -> None:
         if self.rect is None:
             return
-        self.rect.x += self.metadata.scroll_value
+        self.rect.x += self.metadata.scroll_value_x
         move_rect = self._get_vec_with_action(self._ai_action)
         self._wander_vectx += int(move_rect.x)
         self.rect = self.rect.move(move_rect)
