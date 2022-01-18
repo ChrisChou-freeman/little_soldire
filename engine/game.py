@@ -17,8 +17,8 @@ class MainGame:
             level_edit_tile='',
             scroll_value_x=0,
             scroll_value_y=0,
-            screen_shake_x=0,
-            screen_shake_y=0,
+            shake_x=0,
+            shake_y=0,
             screen_shake=0,
             control_action=lib.com_type.ControlAction(),
             scrren=self._screen

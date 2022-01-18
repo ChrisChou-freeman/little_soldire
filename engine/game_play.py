@@ -182,13 +182,13 @@ class GamePlay(lib.GameManager):
     def _screen_shake_control(self) -> None:
         if self.metadata.screen_shake <= 0:
             self.metadata.screen_shake = 0
-            self.metadata.screen_shake_x= 0
-            self.metadata.screen_shake_y= 0
+            self.metadata.shake_x= 0
+            self.metadata.shake_y= 0
             return
         self.metadata.screen_shake -= 1
         random_value = random.randint(0, 8) -4
-        self.metadata.screen_shake_x = random_value
-        self.metadata.screen_shake_y = random_value
+        self.metadata.shake_x = random_value
+        self.metadata.shake_y = random_value
 
     def update(self, dt: float) -> None:
         self._screen_shake_control()
@@ -223,8 +223,8 @@ class GamePlay(lib.GameManager):
         for index, lay_pos in enumerate(self._background_lays_pos):
             lay = self._background_lays[index % len(self._background_lays)]
             new_lay_pos = pg.Vector2(
-                lay_pos.x + self.metadata.screen_shake_x,
-                lay_pos.y + self.metadata.screen_shake_y
+                lay_pos.x + self.metadata.shake_x,
+                lay_pos.y + self.metadata.shake_y
             )
             screen.blit(lay, new_lay_pos)
         self._tile_sprites.draw(screen)

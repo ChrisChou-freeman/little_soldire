@@ -15,8 +15,8 @@ class GameMetaData:
     scroll_value_x: int
     scroll_value_y: int
     screen_shake: int
-    screen_shake_x: int
-    screen_shake_y: int
+    shake_x: int
+    shake_y: int
     control_action: ControlAction
     scrren: surface.Surface
     GAME_OVER: bool = False

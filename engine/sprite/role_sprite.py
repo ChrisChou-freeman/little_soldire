@@ -159,6 +159,7 @@ class Grenade(sprite.Sprite):
                  explode_sprites: sprite.Group,
                  grenade_type: RoleType) -> None:
         super().__init__()
+        self.grenade_id = 0
         self.grenade_type = grenade_type
         self.tile_sprites = tile_sprites
         self.throw_speed = 7
@@ -249,6 +250,7 @@ class RoleSprite(AnimationSprite):
         self.be_hiting_time = 0
         self._attack_counter = 0
         self.health_value = 100
+        self.grenade_number = settings.GRENADE_NUMBER
         self._falling = False
         self.animation_playing = True
         self._set_current_action(init=True)
@@ -369,6 +371,7 @@ class RoleSprite(AnimationSprite):
             self.explode_sprites,
             role
         )
+        new_grenade.grenade_id = id(self)
         self.grenade_sprites.add(new_grenade)
 
     def _get_action(self, control_action: lib.com_type.ControlAction, role: RoleType = RoleType.player) -> None:
@@ -376,6 +379,7 @@ class RoleSprite(AnimationSprite):
         if self.is_empty_health():
             action = 'death'
         else:
+            # move and jump
             if control_action.RUN_LEFT:
                 self.flip = True
                 action = 'run'
@@ -384,15 +388,22 @@ class RoleSprite(AnimationSprite):
                 action = 'run'
             if control_action.JUMPING or self._falling:
                 action = 'jump'
+            # shoot bullet
             if control_action.SHOOT:
                 if self._attack_counter == 0 or self._attack_counter % self.attack_frequency == 0:
                     self._shoot_bullet(role)
                 self._attack_counter += 1
             else:
                 self._attack_counter = 0
-            if control_action.THROW_GRENADE:
-                self._throw_grenade(role)
+            # throw grenade
+            if control_action.THROW_GRENADE and self.grenade_number>0:
                 control_action.THROW_GRENADE = False
+                for grenade in self.grenade_sprites:
+                    grenade_id: int = getattr(grenade, 'grenade_id')
+                    if id(self) == grenade_id:
+                        return
+                self.grenade_number -= 1
+                self._throw_grenade(role)
         if self.be_hiting_time > 0:
             self.be_hiting_time -= 1
             be_hit_action = f'{action}_hit'
@@ -454,14 +465,29 @@ class PlayerSprite(RoleSprite):
         self.rect.x = settings.SCREEN_WIDTH//2
         self.metadata.scroll_value_x = forward_distance
 
-    def hub(self) -> None:
+    def hud_health_bar(self) -> None:
         x = 10
         y = 10
         ratio = self.health_value / 100
         screen = self.metadata.scrren
+        # empty health bar
         pygame.draw.rect(screen, settings.RGB_RED, (x, y, 150, 20))
+        # health bar with health
         pygame.draw.rect(screen, settings.RGB_YELLOW,
                          (x, y, int(150 * ratio), 20))
+
+    def hud_grenade(self) -> None:
+        x = 10
+        y = 40
+        for i in range(self.grenade_number):
+            self.metadata.scrren.blit(
+                self.grenade_img,
+                Vector2(x + (x+self.grenade_img.get_width())*i, y)
+            )
+
+    def hud(self) -> None:
+        self.hud_health_bar()
+        self.hud_grenade()
 
     def _fall_off_screen_derect(self) -> None:
         if self.rect is None:
@@ -477,7 +503,7 @@ class PlayerSprite(RoleSprite):
         self._get_action(self.metadata.control_action)
         self.play()
         self.hit_detect(RoleType.player)
-        self.hub()
+        self.hud()
         self._fall_off_screen_derect()
 
 

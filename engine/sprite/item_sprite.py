@@ -19,8 +19,8 @@ class ItemSprite(sprite.Sprite):
         if self.rect is None:
             return
         self.position.x += self.metadata.scroll_value_x
-        self.rect.x = int(self.position.x + self.metadata.screen_shake_x)
-        self.rect.y = int(self.position.y + self.metadata.screen_shake_y)
+        self.rect.x = int(self.position.x + self.metadata.shake_x)
+        self.rect.y = int(self.position.y + self.metadata.shake_y)
         if self.rect.right < 0:
             self.kill()
 

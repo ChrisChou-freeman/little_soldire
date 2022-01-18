@@ -1,15 +1,16 @@
 from abc import ABC, abstractmethod
 
+import pygame as pg
+
 from .game_data import GameMetaData
 
-from pygame import surface, event
 
 class GameManager(ABC):
     def __init__(self, metadata: GameMetaData) -> None:
         self.metadata = metadata
 
     @abstractmethod
-    def handle_input(self, key_event: event.Event) -> None:
+    def handle_input(self, key_event: pg.event.Event) -> None:
         ...
 
     @abstractmethod
@@ -21,5 +22,5 @@ class GameManager(ABC):
         ...
 
     @abstractmethod
-    def clear(self, screen: surface.Surface) -> None:
+    def clear(self, screen: pg.surface.Surface) -> None:
         ...

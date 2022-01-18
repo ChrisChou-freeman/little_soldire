@@ -2,7 +2,6 @@ import os
 
 import pygame as pg
 
-
 from . import lib, ui, sprite as _sprite, settings
 
 class GameStart(lib.GameManager):
