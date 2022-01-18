@@ -7,6 +7,7 @@ from . import settings, game_start, game_editor, game_play, lib, ui
 
 
 class MainGame:
+
     def __init__(self) -> None:
         pg.init()
         self._screen = self._create_screen()

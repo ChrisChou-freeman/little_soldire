@@ -140,6 +140,7 @@ class ExplodeSprite(AnimationSprite):
             loop=loop,
             frequency=3
         )
+        self.hit_sprites: list[pygame.sprite.Sprite] = []
 
     def update(self, *_, **__) -> None:
         playing = self.play()
@@ -274,8 +275,12 @@ class RoleSprite(AnimationSprite):
         for exp in self.explode_sprites:
             if exp.rect is None:
                 continue
+            hit_sprites: list[pygame.sprite.Sprite] = getattr(exp, 'hit_sprites')
             if exp.rect.colliderect(self.rect):
-                self.health_value = 0
+                if self in hit_sprites:
+                    continue
+                self.health_value -= settings.GRENADE_DAMEGE
+                hit_sprites.append(self)
 
     def is_empty_health(self) -> bool:
         return self.health_value <= 0
