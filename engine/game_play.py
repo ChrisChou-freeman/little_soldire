@@ -21,16 +21,16 @@ class GamePlay(lib.GameManager):
             settings.ITEMS_IMG_PATH)
         self._sprite_images = lib.com_fuc.pygame_load_iamges_with_name(
             settings.SPRITE_IMG_PATH)
-        self._init()
+        self._layers_repets = 2
+        self._current_level = 0
+        self._game_init()
 
-    def _init(self) -> None:
+    def _game_init(self) -> None:
         self.metadata.control_action = lib.com_type.ControlAction()
         self.metadata.GAME_OVER = False
         self._background_lays_pos: list[pg.Vector2] = []
-        self._layers_repets = 2
         self._current_level = 0
         self._grenade_number = 3
-        self._shoot = False
         self._game_pause = False
         self._world_data = lib.GameDataStruct.load_world_data(
             os.path.join(settings.WORLD_DATA_PATH, f'{self._current_level}.pk')
@@ -62,7 +62,7 @@ class GamePlay(lib.GameManager):
             )
             self._continue_menu_list.append(menu)
 
-    def _init_sprite(self,
+    def _init_role_sprite(self,
                      sprite: int,
                      position: pg.Vector2) -> None:
         if sprite in settings.PLAYER_TILES:
@@ -73,6 +73,8 @@ class GamePlay(lib.GameManager):
                 self._bullet_sprites,
                 self._grenade_sprites,
                 self._explode_sprites,
+                self._background_lays_pos,
+                self._background_lays[-1].get_width(),
                 self.metadata
             )
             self._player_sprites.add(player_sprite)
@@ -101,10 +103,17 @@ class GamePlay(lib.GameManager):
             )
             if data_type == settings.IMG_TYPE_TILES:
                 img_surface = self._tiles_images[tile_name]
-                self._tile_sprites.add(_sprite.TileSprite(
-                    img_surface, position, self.metadata))
+                collition = False if img in settings.NO_COLLITION_SPRITE else True
+                self._tile_sprites.add(
+                    _sprite.TileSprite(
+                        img_surface,
+                        position,
+                        self.metadata,
+                        collition
+                    )
+                )
             elif data_type == settings.IMG_TYPE_SPRITES:
-                self._init_sprite(img, position)
+                self._init_role_sprite(img, position)
             elif data_type == settings.IMG_TYPE_ITEMS:
                 img_surface = self._item_images[tile_name]
                 self._item_sprites.add(_sprite.ItemSprite(
@@ -150,7 +159,7 @@ class GamePlay(lib.GameManager):
         # for index, menu in enumerate(self._continue_menu_list):
         if key_map.key_enter_press():
             if CONTINUE_MENU_LIST[self._selected_continue_menu] == 'Restart':
-                self._init()
+                self._game_init()
             elif CONTINUE_MENU_LIST[self._selected_continue_menu] == 'Exit':
                 self.metadata.game_mode = settings.GAME_START
         elif key_map.key_up_press():
@@ -227,9 +236,9 @@ class GamePlay(lib.GameManager):
                 lay_pos.y + self.metadata.shake_y
             )
             screen.blit(lay, new_lay_pos)
-        self._tile_sprites.draw(screen)
         self._item_sprites.draw(screen)
         self._player_sprites.draw(screen)
+        self._tile_sprites.draw(screen)
         self._enemy_sprites.draw(screen)
         self._bullet_sprites.draw(screen)
         self._grenade_sprites.draw(screen)

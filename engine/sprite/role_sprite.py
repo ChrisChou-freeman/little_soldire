@@ -312,7 +312,8 @@ class RoleSprite(AnimationSprite):
         if self.image is None:
             return
 
-    def _get_vec_with_action(self, control_action: lib.com_type.ControlAction) -> Vector2:
+    def _get_vec_with_action(self, control_action: lib.com_type.ControlAction,
+                             border_left: bool=False, border_right: bool=False) -> Vector2:
         if self.is_empty_health():
             return Vector2()
         if control_action.JUMPING and not self._falling:
@@ -331,6 +332,10 @@ class RoleSprite(AnimationSprite):
         if c_d_vect.y == 0:
             control_action.JUMPING = False
             self._falling = False
+        if border_left and c_d_vect.x < 0:
+            c_d_vect.x = 0
+        if border_right and c_d_vect.x > 0:
+            c_d_vect.x = 0
         return c_d_vect
 
     def _shoot_bullet(self, role: RoleType) -> None:
@@ -417,6 +422,9 @@ class RoleSprite(AnimationSprite):
     def _collition_detect(self, vect: Vector2) -> Vector2:
         new_vect = Vector2(vect.x, vect.y)
         for sprite in self.tile_sprites:
+            collition: bool = getattr(sprite, 'collition')
+            if not collition:
+                continue
             if self.rect is None or sprite.rect is None:
                 return new_vect
             is_collide_x = sprite.rect.colliderect(
@@ -445,18 +453,35 @@ class PlayerSprite(RoleSprite):
                  bullet_sprites: sprite.Group,
                  grenade_sprites: sprite.Group,
                  explode_sprites: sprite.Group,
+                 background_lay_pos: list[pygame.Vector2],
+                 background_lay_width: int,
                  metadata: lib.GameMetaData) -> None:
         super().__init__(sprite_sheet_info, position, tile_sprites,
                          bullet_sprites, grenade_sprites, explode_sprites, metadata)
+        self.background_lay_pos = background_lay_pos
+        self.background_lay_width = background_lay_width
 
     def move(self) -> None:
         if self.rect is None:
             return
-        if self.rect.x <= 0 and self.metadata.control_action.RUN_LEFT:
-            return
+        border_left = False
+        border_right = False
+        if self.rect.x <= 0:
+            border_left = True
+        right_border = self.background_lay_pos[-1].x + self.background_lay_width
+        if self.rect.right >= right_border:
+            border_right = True
         self.rect = self.rect.move(
-            self._get_vec_with_action(self.metadata.control_action))
+            self._get_vec_with_action(
+                self.metadata.control_action,
+                border_left=border_left,
+                border_right=border_right
+            )
+        )
         self.position.x, self.position.y = self.rect.x, self.rect.y
+        if right_border <= settings.SCREEN_WIDTH:
+            self.metadata.scroll_value_x = 0
+            return
         # scroll screen
         if self.rect.x < settings.SCREEN_WIDTH//2:
             self.metadata.scroll_value_x = 0

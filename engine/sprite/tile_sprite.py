@@ -7,13 +7,15 @@ class TileSprite(sprite.Sprite):
     def __init__(self,
                  image: surface.Surface,
                  position: Vector2,
-                 metadata: GameMetaData) -> None:
+                 metadata: GameMetaData,
+                 collition: bool = True) -> None:
         super().__init__()
         self.image = image
         self.rect = image.get_rect()
         self.position = position
         self.rect = self.rect.move(position)
         self.metadata = metadata
+        self.collition = collition
 
     def update(self, *_, **__) -> None:
         if self.rect is None:

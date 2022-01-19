@@ -103,6 +103,9 @@ IMG_TYPE_SPRITES = SPRITE_IMG_PATH.split('/')[-1]
 PLAYER_TILES = [1,]
 ENEMY_TILES = [2,]
 
+# no collition sprite list
+NO_COLLITION_SPRITE = (9, 10)
+
 # game mode
 GAME_START = 'Game Start'
 GAME_PLAY = 'Play'
